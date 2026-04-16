@@ -2,12 +2,16 @@ package com.jvn.emeraldpouch.item;
 
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
+import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.entity.player.Player;
@@ -98,5 +102,23 @@ public class PouchItem extends Item {
 
         access.set(remainder);
         return true;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        Component compactState = Component.translatable(
+                isAutoCompactEnabled(stack)
+                        ? "tooltip.emeraldpouch.state.on"
+                        : "tooltip.emeraldpouch.state.off"
+        );
+        Component pickupState = Component.translatable(
+                isAutoPickupEnabled(stack)
+                        ? "tooltip.emeraldpouch.state.on"
+                        : "tooltip.emeraldpouch.state.off"
+        );
+
+        tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.slots", this.slotCount).withStyle(ChatFormatting.GRAY));
+        tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_compact", compactState).withStyle(ChatFormatting.GRAY));
+        tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_pickup", pickupState).withStyle(ChatFormatting.GRAY));
     }
 }

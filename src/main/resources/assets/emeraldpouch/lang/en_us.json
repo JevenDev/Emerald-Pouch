@@ -7,5 +7,10 @@
   "screen.emeraldpouch.auto_compact.on": "Auto-compact: ON",
   "screen.emeraldpouch.auto_compact.off": "Auto-compact: OFF",
   "screen.emeraldpouch.auto_pickup.on": "Auto-pickup: ON",
-  "screen.emeraldpouch.auto_pickup.off": "Auto-pickup: OFF"
+  "screen.emeraldpouch.auto_pickup.off": "Auto-pickup: OFF",
+  "tooltip.emeraldpouch.slots": "Slots: %s",
+  "tooltip.emeraldpouch.auto_compact": "Auto-compact: %s",
+  "tooltip.emeraldpouch.auto_pickup": "Auto-pickup: %s",
+  "tooltip.emeraldpouch.state.on": "ON",
+  "tooltip.emeraldpouch.state.off": "OFF"
 }
