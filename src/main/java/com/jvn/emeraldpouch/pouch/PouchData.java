@@ -221,6 +221,18 @@ public final class PouchData {
         return true;
     }
 
+    public static int getStoredEmeraldEquivalent(ItemStack pouchStack) {
+        int total = 0;
+        for (ItemStack stack : loadContents(pouchStack)) {
+            if (stack.is(Items.EMERALD)) {
+                total += stack.getCount();
+            } else if (stack.is(Items.EMERALD_BLOCK)) {
+                total += stack.getCount() * 9;
+            }
+        }
+        return total;
+    }
+
     private static boolean readToggle(ItemStack pouchStack, String key) {
         CustomData customData = pouchStack.get(DataComponents.CUSTOM_DATA);
         if (customData == null) {

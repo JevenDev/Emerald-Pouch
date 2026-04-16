@@ -8,7 +8,7 @@
   "screen.emeraldpouch.auto_compact.off": "Auto-compact: OFF",
   "screen.emeraldpouch.auto_pickup.on": "Auto-pickup: ON",
   "screen.emeraldpouch.auto_pickup.off": "Auto-pickup: OFF",
-  "tooltip.emeraldpouch.slots": "Slots: %s",
+  "tooltip.emeraldpouch.stored_emeralds": "Stored emeralds: %s",
   "tooltip.emeraldpouch.auto_compact": "Auto-compact: %s",
   "tooltip.emeraldpouch.auto_pickup": "Auto-pickup: %s",
   "tooltip.emeraldpouch.state.on": "ON",
