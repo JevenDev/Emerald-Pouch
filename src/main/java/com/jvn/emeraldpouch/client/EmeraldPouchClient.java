@@ -2,6 +2,7 @@ package com.jvn.emeraldpouch.client;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import com.jvn.emeraldpouch.network.OpenFirstPouchPayload;
 import com.jvn.emeraldpouch.pouch.PouchData;
@@ -30,8 +31,40 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class EmeraldPouchClient {
-    private static final ResourceLocation POUCH_HUD_TEXTURE =
+    private static final ResourceLocation EMERALD_POUCH_HUD_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch.png");
+    private static final ResourceLocation BLACK_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/black_emerald_pouch.png");
+    private static final ResourceLocation BLUE_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/blue_emerald_pouch.png");
+    private static final ResourceLocation BROWN_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/brown_emerald_pouch.png");
+    private static final ResourceLocation CYAN_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/cyan_emerald_pouch.png");
+    private static final ResourceLocation GRAY_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/gray_emerald_pouch.png");
+    private static final ResourceLocation GREEN_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/green_emerald_pouch.png");
+    private static final ResourceLocation LIGHT_BLUE_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_blue_emerald_pouch.png");
+    private static final ResourceLocation LIGHT_GRAY_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_gray_emerald_pouch.png");
+    private static final ResourceLocation LIME_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/lime_emerald_pouch.png");
+    private static final ResourceLocation MAGENTA_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/magenta_emerald_pouch.png");
+    private static final ResourceLocation ORANGE_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/orange_emerald_pouch.png");
+    private static final ResourceLocation PINK_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/pink_emerald_pouch.png");
+    private static final ResourceLocation PURPLE_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/purple_emerald_pouch.png");
+    private static final ResourceLocation RED_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/red_emerald_pouch.png");
+    private static final ResourceLocation WHITE_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/white_emerald_pouch.png");
+    private static final ResourceLocation YELLOW_POUCH_HUD_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/yellow_emerald_pouch.png");
     private static final ResourceLocation POUCH_HUD_HOVER_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch_hover.png");
     private static final int HUD_ICON_SIZE = 16;
@@ -47,8 +80,8 @@ public final class EmeraldPouchClient {
     private static final int POSITION_3_Y_FROM_BOTTOM = 19;
     private static final int INVENTORY_ICON_RIGHT_MARGIN = 6;
     private static final int INVENTORY_ICON_TOP_MARGIN = 62;
-    private static final int HUD_TEXT_Y_OFFSET = 1;
-    private static final int INVENTORY_TEXT_Y_OFFSET = 1;
+    private static final int HUD_TEXT_Y_OFFSET = 2;
+    private static final int INVENTORY_TEXT_Y_OFFSET = 2;
     private static final int BUNDLE_OVERLAY_TEXT_X_OFFSET = 4;
     private static final int BUNDLE_OVERLAY_TEXT_Y_OFFSET = 4;
     private static boolean showPouchText = true;
@@ -135,7 +168,8 @@ public final class EmeraldPouchClient {
                 counterText,
                 displayData.pouchCount(),
                 layout,
-                hoverIcon ? POUCH_HUD_HOVER_TEXTURE : POUCH_HUD_TEXTURE
+                hudIconTexture(),
+                hoverIcon
         );
 
         boolean hoverText = showPouchText
@@ -224,7 +258,10 @@ public final class EmeraldPouchClient {
             HumanoidArm mainArm
     ) {
         DisplayLayout layout = computeHudLayout(minecraft, guiGraphics.guiWidth(), guiGraphics.guiHeight(), counterText, mainArm);
-        renderIconAndMaybeText(guiGraphics, minecraft, counterText, bundleCount, layout, POUCH_HUD_TEXTURE);
+        int mouseX = scaledMouseX(minecraft);
+        int mouseY = scaledMouseY(minecraft);
+        boolean hoverIcon = isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
+        renderIconAndMaybeText(guiGraphics, minecraft, counterText, bundleCount, layout, hudIconTexture(), hoverIcon);
     }
 
     private static void renderIconAndMaybeText(
@@ -233,10 +270,11 @@ public final class EmeraldPouchClient {
             String text,
             int bundleCount,
             DisplayLayout layout,
-            ResourceLocation texture
+            ResourceLocation baseTexture,
+            boolean hoverIcon
     ) {
         guiGraphics.blit(
-                texture,
+                baseTexture,
                 layout.iconX(),
                 layout.iconY(),
                 0.0F,
@@ -246,6 +284,10 @@ public final class EmeraldPouchClient {
                 HUD_ICON_SIZE,
                 HUD_ICON_SIZE
         );
+
+        if (hoverIcon) {
+            drawHoverOverlay(guiGraphics, layout.iconX(), layout.iconY());
+        }
 
         if (showPouchText) {
             drawXpStyleText(guiGraphics, minecraft, text, layout.textX(), layout.textY());
@@ -290,6 +332,51 @@ public final class EmeraldPouchClient {
 
     private static boolean isHovered(double mouseX, double mouseY, int x, int y, int width, int height) {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
+
+    private static void drawHoverOverlay(GuiGraphics guiGraphics, int iconX, int iconY) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        // Brighten only where the hover mask has alpha.
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
+        guiGraphics.blit(
+                POUCH_HUD_HOVER_TEXTURE,
+                iconX,
+                iconY,
+                0.0F,
+                0.0F,
+                HUD_ICON_SIZE,
+                HUD_ICON_SIZE,
+                HUD_ICON_SIZE,
+                HUD_ICON_SIZE
+        );
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableBlend();
+    }
+
+    private static ResourceLocation hudIconTexture() {
+        return switch (EmeraldPouchClientConfig.hudIconColor()) {
+            case EMERALD -> EMERALD_POUCH_HUD_TEXTURE;
+            case BLACK -> BLACK_POUCH_HUD_TEXTURE;
+            case BLUE -> BLUE_POUCH_HUD_TEXTURE;
+            case BROWN -> BROWN_POUCH_HUD_TEXTURE;
+            case CYAN -> CYAN_POUCH_HUD_TEXTURE;
+            case GRAY -> GRAY_POUCH_HUD_TEXTURE;
+            case GREEN -> GREEN_POUCH_HUD_TEXTURE;
+            case LIGHT_BLUE -> LIGHT_BLUE_POUCH_HUD_TEXTURE;
+            case LIGHT_GRAY -> LIGHT_GRAY_POUCH_HUD_TEXTURE;
+            case LIME -> LIME_POUCH_HUD_TEXTURE;
+            case MAGENTA -> MAGENTA_POUCH_HUD_TEXTURE;
+            case ORANGE -> ORANGE_POUCH_HUD_TEXTURE;
+            case PINK -> PINK_POUCH_HUD_TEXTURE;
+            case PURPLE -> PURPLE_POUCH_HUD_TEXTURE;
+            case RED -> RED_POUCH_HUD_TEXTURE;
+            case WHITE -> WHITE_POUCH_HUD_TEXTURE;
+            case YELLOW -> YELLOW_POUCH_HUD_TEXTURE;
+        };
     }
 
     private static DisplayLayout computeInventoryLayout(Minecraft minecraft, InventoryScreen screen, String counterText) {
