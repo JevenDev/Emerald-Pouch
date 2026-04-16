@@ -19,11 +19,13 @@ public final class ModNetwork {
     }
 
     private static void handleOpenFirstPouch(OpenFirstPouchPayload payload, IPayloadContext context) {
-        if (!(context.player() instanceof ServerPlayer serverPlayer)) {
-            return;
-        }
+        context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer serverPlayer)) {
+                return;
+            }
 
-        PouchInventoryAccess.findFirstPouch(serverPlayer.getInventory())
-                .ifPresent(reference -> PouchMenuOpener.openFromReference(serverPlayer, reference));
+            PouchInventoryAccess.findFirstPouch(serverPlayer.getInventory())
+                    .ifPresent(reference -> PouchMenuOpener.openFromReference(serverPlayer, reference));
+        });
     }
 }

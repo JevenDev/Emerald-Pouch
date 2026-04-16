@@ -11,6 +11,10 @@ public final class AutoPickupHandler {
     }
 
     public static void onItemEntityPickupPost(ItemEntityPickupEvent.Post event) {
+        if (event.getPlayer().level().isClientSide()) {
+            return;
+        }
+
         ItemStack originalStack = event.getOriginalStack();
         if (!PouchData.isAllowedContent(originalStack)) {
             return;

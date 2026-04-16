@@ -63,7 +63,7 @@ public final class PouchInventoryAccess {
         }
 
         int extracted = 0;
-        for (int slot : getDeterministicInventorySlots()) {
+        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
             if (extracted >= maxCount) {
                 break;
             }
@@ -79,6 +79,18 @@ public final class PouchInventoryAccess {
                 inventory.setItem(slot, ItemStack.EMPTY);
             }
             extracted += take;
+        }
+
+        if (extracted < maxCount) {
+            ItemStack offhand = inventory.getItem(Inventory.SLOT_OFFHAND);
+            if (ItemStack.isSameItemSameComponents(offhand, matcher)) {
+                int take = Math.min(maxCount - extracted, offhand.getCount());
+                offhand.shrink(take);
+                if (offhand.isEmpty()) {
+                    inventory.setItem(Inventory.SLOT_OFFHAND, ItemStack.EMPTY);
+                }
+                extracted += take;
+            }
         }
 
         if (extracted <= 0) {
@@ -99,27 +111,18 @@ public final class PouchInventoryAccess {
         }
     }
 
-    public static List<Integer> getDeterministicInventorySlots() {
-        List<Integer> slots = new ArrayList<>(Inventory.INVENTORY_SIZE + 1);
-        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
-            slots.add(slot);
-        }
-        slots.add(Inventory.SLOT_OFFHAND);
-        return slots;
-    }
-
     public static List<PouchStackReference> getDeterministicPouchReferences(Inventory inventory) {
-        List<PouchStackReference> references = new ArrayList<>();
+        int accessoriesBeltSlots = AccessoriesCompat.getBeltSlotCount(inventory.player);
+        int curiosSlots = CuriosCompat.getSlotCount(inventory.player);
+        List<PouchStackReference> references = new ArrayList<>(accessoriesBeltSlots + curiosSlots + Inventory.INVENTORY_SIZE + 1);
 
         // Prioritize equipped slot pouches over inventory pouches.
-        int accessoriesBeltSlots = AccessoriesCompat.getBeltSlotCount(inventory.player);
         for (int slot = 0; slot < accessoriesBeltSlots; slot++) {
             if (PouchData.isPouchStack(AccessoriesCompat.getBeltStackInSlot(inventory.player, slot))) {
                 references.add(PouchStackReference.accessoriesBelt(slot));
             }
         }
 
-        int curiosSlots = CuriosCompat.getSlotCount(inventory.player);
         for (int slot = 0; slot < curiosSlots; slot++) {
             if (PouchData.isPouchStack(CuriosCompat.getStackInSlot(inventory.player, slot))) {
                 references.add(PouchStackReference.curios(slot));
