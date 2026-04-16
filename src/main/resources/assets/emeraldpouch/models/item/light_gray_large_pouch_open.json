@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "emeraldpouch:item/light_gray_large_pouch"
+  }
+}

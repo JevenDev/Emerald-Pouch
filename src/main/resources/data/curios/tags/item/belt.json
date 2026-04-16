@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "emeraldpouch:pouch",
-    "emeraldpouch:large_pouch"
+    "#emeraldpouch:all_pouches"
   ]
 }

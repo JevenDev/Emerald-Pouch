@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "emeraldpouch:item/purple_pouch_full"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "emeraldpouch:opened": 1.0
+      },
+      "model": "emeraldpouch:item/purple_pouch_open"
+    }
+  ]
+}

@@ -3,8 +3,10 @@ package com.jvn.emeraldpouch;
 import com.jvn.emeraldpouch.event.AutoPickupHandler;
 import com.jvn.emeraldpouch.event.PouchUseHandler;
 import com.jvn.emeraldpouch.network.ModNetwork;
+import com.jvn.emeraldpouch.registry.ModCreativeTabs;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
+import com.jvn.emeraldpouch.registry.ModRecipeSerializers;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -22,11 +24,12 @@ import org.slf4j.Logger;
 @Mod(EmeraldPouchMod.MOD_ID)
 public final class EmeraldPouchMod {
     public static final String MOD_ID = "emeraldpouch";
-    public static final Logger LOGGER = LogUtils.getLogger();
 
     public EmeraldPouchMod(IEventBus modEventBus, ModContainer modContainer) {
         ModItems.register(modEventBus);
         ModMenus.register(modEventBus);
+        ModCreativeTabs.register(modEventBus);
+        ModRecipeSerializers.register(modEventBus);
 
         modEventBus.addListener(this::addCreativeTabItems);
         modEventBus.addListener(ModNetwork::registerPayloadHandlers);
@@ -48,8 +51,9 @@ public final class EmeraldPouchMod {
 
     private void addCreativeTabItems(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(ModItems.POUCH.get());
-            event.accept(ModItems.LARGE_POUCH.get());
+            for (var item : ModItems.allPouchItems()) {
+                event.accept(item.get());
+            }
         }
     }
 }
