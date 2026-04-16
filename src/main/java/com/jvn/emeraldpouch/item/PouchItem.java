@@ -43,6 +43,10 @@ public class PouchItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack heldStack = player.getItemInHand(usedHand);
+        if (player.isShiftKeyDown() && ModCompat.hasSlotCompatLoaded()) {
+            return InteractionResultHolder.pass(heldStack);
+        }
+
         if (player instanceof ServerPlayer serverPlayer) {
             PouchMenuOpener.openFromHand(serverPlayer, usedHand);
         }
