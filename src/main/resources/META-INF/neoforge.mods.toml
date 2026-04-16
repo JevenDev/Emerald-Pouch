@@ -1,7 +1,7 @@
-modLoader="javafml" #mandatory
-loaderVersion="${loader_version_range}" #mandatory
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
 license="${mod_license}"
-# issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/"
+issueTrackerURL="https://github.com/JevenDev/Emerald-Pouch/issues"
 
 [[mods]]
 modId="${mod_id}"
@@ -9,7 +9,7 @@ version="${mod_version}"
 displayName="${mod_name}"
 # logoFile="logo.png"
 authors="jvn"
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/"
+displayURL="https://modrinth.com/mod/emerald-pouch"
 description='''
 Portable emerald-only storage pouches with auto compact and auto pickup toggles.
 '''

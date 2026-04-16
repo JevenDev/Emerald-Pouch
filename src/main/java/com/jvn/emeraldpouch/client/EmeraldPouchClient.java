@@ -66,16 +66,10 @@ public final class EmeraldPouchClient {
 
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemProperties.register(
-                    ModItems.POUCH.get(),
-                    ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened"),
-                    EmeraldPouchClient::openedProperty
-            );
-            ItemProperties.register(
-                    ModItems.LARGE_POUCH.get(),
-                    ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened"),
-                    EmeraldPouchClient::openedProperty
-            );
+            ResourceLocation openedPropertyId = ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened");
+            for (var item : ModItems.allPouchItems()) {
+                ItemProperties.register(item.get(), openedPropertyId, EmeraldPouchClient::openedProperty);
+            }
         });
     }
 

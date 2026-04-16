@@ -146,5 +146,9 @@ public class PouchItem extends Item {
                 tooltipComponents.add(Component.translatable("container.shulkerBox.more", total - shown).withStyle(ChatFormatting.ITALIC));
             }
         }
+
+        if (!tooltipFlag.hasShiftDown()) {
+            tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.more_info").withStyle(ChatFormatting.GRAY));
+        }
     }
 }

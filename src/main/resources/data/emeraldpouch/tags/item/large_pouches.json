@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "emeraldpouch:large_pouch",
+    "emeraldpouch:black_large_pouch",
+    "emeraldpouch:blue_large_pouch",
+    "emeraldpouch:brown_large_pouch",
+    "emeraldpouch:cyan_large_pouch",
+    "emeraldpouch:gray_large_pouch",
+    "emeraldpouch:green_large_pouch",
+    "emeraldpouch:light_blue_large_pouch",
+    "emeraldpouch:light_gray_large_pouch",
+    "emeraldpouch:lime_large_pouch",
+    "emeraldpouch:magenta_large_pouch",
+    "emeraldpouch:orange_large_pouch",
+    "emeraldpouch:pink_large_pouch",
+    "emeraldpouch:purple_large_pouch",
+    "emeraldpouch:red_large_pouch",
+    "emeraldpouch:white_large_pouch",
+    "emeraldpouch:yellow_large_pouch"
+  ]
+}
