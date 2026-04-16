@@ -2,6 +2,8 @@ package com.jvn.emeraldpouch.menu;
 
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.pouch.PouchItemContainer;
+import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
+import com.jvn.emeraldpouch.pouch.PouchStackReference;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -23,26 +25,40 @@ public class PouchMenu extends AbstractContainerMenu {
     private final Inventory playerInventory;
     private final PouchItemContainer pouchContainer;
     private final Item pouchItem;
-    private final int pouchInventorySlot;
+    private final PouchStackReference pouchReference;
+    private final int lockedInventorySlot;
     private final int storageSlotCount;
     private final int storageRows;
     private final ContainerData toggleData;
 
     public PouchMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf extraData) {
-        this(containerId, playerInventory, extraData.readVarInt(), extraData.readVarInt());
+        this(
+                containerId,
+                playerInventory,
+                PouchStackReference.Type.fromNetworkId(extraData.readVarInt()),
+                extraData.readVarInt(),
+                extraData.readVarInt()
+        );
     }
 
-    public PouchMenu(int containerId, Inventory playerInventory, int pouchInventorySlot, int storageSlotCount) {
+    public PouchMenu(
+            int containerId,
+            Inventory playerInventory,
+            PouchStackReference.Type pouchSourceType,
+            int pouchSourceSlot,
+            int storageSlotCount
+    ) {
         super(ModMenus.POUCH_MENU.get(), containerId);
         this.playerInventory = playerInventory;
-        this.pouchInventorySlot = pouchInventorySlot;
+        this.pouchReference = new PouchStackReference(pouchSourceType, pouchSourceSlot);
+        this.lockedInventorySlot = pouchSourceType == PouchStackReference.Type.INVENTORY ? pouchSourceSlot : -1;
         this.storageSlotCount = Math.max(0, storageSlotCount);
         this.storageRows = Math.max(1, (this.storageSlotCount + 8) / 9);
 
         ItemStack pouchStack = getCurrentPouchStack();
         this.pouchItem = pouchStack.getItem();
         this.pouchContainer = new PouchItemContainer(pouchStack, this.storageSlotCount);
-        this.pouchContainer.setChangeListener(() -> this.slotsChanged(this.pouchContainer));
+        this.pouchContainer.setChangeListener(this::onPouchContainerChanged);
 
         this.toggleData = new SimpleContainerData(2);
         addDataSlots(this.toggleData);
@@ -58,10 +74,6 @@ public class PouchMenu extends AbstractContainerMenu {
 
     public int storageSlotCount() {
         return storageSlotCount;
-    }
-
-    public int pouchInventorySlot() {
-        return pouchInventorySlot;
     }
 
     public boolean isAutoCompactEnabled() {
@@ -93,12 +105,14 @@ public class PouchMenu extends AbstractContainerMenu {
 
         if (id == BUTTON_TOGGLE_AUTO_COMPACT) {
             PouchData.toggleAutoCompact(pouchStack);
+            PouchInventoryAccess.commitPouchStack(this.playerInventory, this.pouchReference, pouchStack);
             syncToggleDataFromStack();
             return true;
         }
 
         if (id == BUTTON_TOGGLE_AUTO_PICKUP) {
             PouchData.toggleAutoPickup(pouchStack);
+            PouchInventoryAccess.commitPouchStack(this.playerInventory, this.pouchReference, pouchStack);
             syncToggleDataFromStack();
             return true;
         }
@@ -108,7 +122,7 @@ public class PouchMenu extends AbstractContainerMenu {
 
     @Override
     public void clicked(int slotId, int button, ClickType clickType, Player player) {
-        if (clickType == ClickType.SWAP && button == this.pouchInventorySlot) {
+        if (clickType == ClickType.SWAP && button == this.lockedInventorySlot) {
             return;
         }
         super.clicked(slotId, button, clickType, player);
@@ -119,6 +133,7 @@ public class PouchMenu extends AbstractContainerMenu {
         ItemStack pouchStack = getCurrentPouchStack();
         if (PouchData.isPouchStack(pouchStack)) {
             PouchData.setOpenedVisualEnabled(pouchStack, false);
+            PouchInventoryAccess.commitPouchStack(this.playerInventory, this.pouchReference, pouchStack);
         }
         super.removed(player);
         this.pouchContainer.setChanged();
@@ -186,27 +201,29 @@ public class PouchMenu extends AbstractContainerMenu {
                 int slot = column + row * 9 + HOTBAR_SLOT_COUNT;
                 int x = 8 + column * 18;
                 int y = 103 + row * 18 + verticalOffset;
-                addSlot(new LockedPlayerInventorySlot(playerInventory, slot, x, y, pouchInventorySlot));
+                addSlot(new LockedPlayerInventorySlot(playerInventory, slot, x, y, lockedInventorySlot));
             }
         }
 
         for (int slot = 0; slot < HOTBAR_SLOT_COUNT; slot++) {
             int x = 8 + slot * 18;
             int y = 161 + verticalOffset;
-            addSlot(new LockedPlayerInventorySlot(playerInventory, slot, x, y, pouchInventorySlot));
+            addSlot(new LockedPlayerInventorySlot(playerInventory, slot, x, y, lockedInventorySlot));
         }
     }
 
     private ItemStack getCurrentPouchStack() {
-        if (pouchInventorySlot < 0 || pouchInventorySlot >= playerInventory.getContainerSize()) {
-            return ItemStack.EMPTY;
-        }
-        return playerInventory.getItem(pouchInventorySlot);
+        return PouchInventoryAccess.getPouchStack(this.playerInventory, this.pouchReference);
     }
 
     private void syncToggleDataFromStack() {
         ItemStack pouchStack = getCurrentPouchStack();
         this.toggleData.set(0, PouchData.isAutoCompactEnabled(pouchStack) ? 1 : 0);
         this.toggleData.set(1, PouchData.isAutoPickupEnabled(pouchStack) ? 1 : 0);
+    }
+
+    private void onPouchContainerChanged() {
+        PouchInventoryAccess.commitPouchStack(this.playerInventory, this.pouchReference, this.pouchContainer.getPouchStack());
+        this.slotsChanged(this.pouchContainer);
     }
 }

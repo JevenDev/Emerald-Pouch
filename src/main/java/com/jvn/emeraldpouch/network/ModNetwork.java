@@ -23,9 +23,7 @@ public final class ModNetwork {
             return;
         }
 
-        int pouchSlot = PouchInventoryAccess.findFirstPouchSlot(serverPlayer.getInventory());
-        if (pouchSlot >= 0) {
-            PouchMenuOpener.openFromInventorySlot(serverPlayer, pouchSlot);
-        }
+        PouchInventoryAccess.findFirstPouch(serverPlayer.getInventory())
+                .ifPresent(reference -> PouchMenuOpener.openFromReference(serverPlayer, reference));
     }
 }

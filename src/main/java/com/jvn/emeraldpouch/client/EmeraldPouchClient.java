@@ -1,7 +1,7 @@
 package com.jvn.emeraldpouch.client;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
-import com.jvn.emeraldpouch.menu.PouchMenu;
+import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.network.OpenFirstPouchPayload;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
@@ -54,16 +54,6 @@ public final class EmeraldPouchClient {
     }
 
     private static float openedProperty(net.minecraft.world.item.ItemStack stack, net.minecraft.client.multiplayer.ClientLevel level, net.minecraft.world.entity.LivingEntity entity, int seed) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null || !(minecraft.player.containerMenu instanceof PouchMenu pouchMenu)) {
-            return 0.0F;
-        }
-
-        int slot = pouchMenu.pouchInventorySlot();
-        if (slot < 0 || slot >= minecraft.player.getInventory().getContainerSize()) {
-            return 0.0F;
-        }
-
-        return stack == minecraft.player.getInventory().getItem(slot) ? 1.0F : 0.0F;
+        return PouchData.isOpenedVisualEnabled(stack) ? 1.0F : 0.0F;
     }
 }
