@@ -135,12 +135,90 @@ public final class PouchData {
 
         int inserted = targetInsert - remaining;
         if (inserted > 0) {
+            if (isAutoCompactEnabled(pouchStack)) {
+                compactContents(contents);
+            }
             saveContents(pouchStack, contents);
         }
 
         ItemStack remainder = incoming.copy();
         remainder.shrink(inserted);
         return remainder;
+    }
+
+    public static boolean compactContents(List<ItemStack> contents) {
+        int emeraldCount = 0;
+        int blockSpace = 0;
+        for (ItemStack stack : contents) {
+            if (stack.is(Items.EMERALD)) {
+                emeraldCount += stack.getCount();
+            } else if (stack.is(Items.EMERALD_BLOCK)) {
+                blockSpace += stack.getMaxStackSize() - stack.getCount();
+            } else if (stack.isEmpty()) {
+                blockSpace += Items.EMERALD_BLOCK.getDefaultInstance().getMaxStackSize();
+            }
+        }
+
+        int blocksFromEmeralds = emeraldCount / 9;
+        int blocksToCreate = Math.min(blocksFromEmeralds, blockSpace);
+        if (blocksToCreate <= 0) {
+            return false;
+        }
+
+        List<ItemStack> snapshot = new ArrayList<>(contents.size());
+        for (ItemStack stack : contents) {
+            snapshot.add(stack.copy());
+        }
+
+        int emeraldsToConsume = blocksToCreate * 9;
+        for (int i = 0; i < contents.size() && emeraldsToConsume > 0; i++) {
+            ItemStack stack = contents.get(i);
+            if (!stack.is(Items.EMERALD)) {
+                continue;
+            }
+
+            int remove = Math.min(stack.getCount(), emeraldsToConsume);
+            stack.shrink(remove);
+            emeraldsToConsume -= remove;
+            if (stack.isEmpty()) {
+                contents.set(i, ItemStack.EMPTY);
+            }
+        }
+
+        int blocksToInsert = blocksToCreate;
+        for (int i = 0; i < contents.size() && blocksToInsert > 0; i++) {
+            ItemStack stack = contents.get(i);
+            if (!stack.is(Items.EMERALD_BLOCK)) {
+                continue;
+            }
+
+            int move = Math.min(blocksToInsert, stack.getMaxStackSize() - stack.getCount());
+            if (move <= 0) {
+                continue;
+            }
+
+            stack.grow(move);
+            blocksToInsert -= move;
+        }
+
+        for (int i = 0; i < contents.size() && blocksToInsert > 0; i++) {
+            if (!contents.get(i).isEmpty()) {
+                continue;
+            }
+
+            int move = Math.min(blocksToInsert, Items.EMERALD_BLOCK.getDefaultInstance().getMaxStackSize());
+            contents.set(i, new ItemStack(Items.EMERALD_BLOCK, move));
+            blocksToInsert -= move;
+        }
+
+        if (emeraldsToConsume != 0 || blocksToInsert != 0) {
+            for (int i = 0; i < contents.size(); i++) {
+                contents.set(i, snapshot.get(i));
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private static boolean readToggle(ItemStack pouchStack, String key) {

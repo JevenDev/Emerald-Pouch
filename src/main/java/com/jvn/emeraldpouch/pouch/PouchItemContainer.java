@@ -93,6 +93,9 @@ public class PouchItemContainer implements Container {
 
     @Override
     public void setChanged() {
+        if (PouchData.isAutoCompactEnabled(this.pouchStack)) {
+            PouchData.compactContents(this.items);
+        }
         PouchData.saveContents(this.pouchStack, this.items);
         this.changeListener.run();
     }
