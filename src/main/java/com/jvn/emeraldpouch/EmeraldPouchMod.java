@@ -1,5 +1,6 @@
 package com.jvn.emeraldpouch;
 
+import com.jvn.emeraldpouch.event.AutoPickupHandler;
 import com.jvn.emeraldpouch.network.ModNetwork;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
@@ -9,6 +10,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.api.distmarker.Dist;
 import org.slf4j.Logger;
@@ -24,6 +26,7 @@ public final class EmeraldPouchMod {
 
         modEventBus.addListener(this::addCreativeTabItems);
         modEventBus.addListener(ModNetwork::registerPayloadHandlers);
+        NeoForge.EVENT_BUS.addListener(AutoPickupHandler::onItemEntityPickupPost);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::registerScreens);
             modEventBus.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::registerKeyMappings);
