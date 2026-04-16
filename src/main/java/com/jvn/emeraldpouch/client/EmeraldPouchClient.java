@@ -28,23 +28,18 @@ public final class EmeraldPouchClient {
     }
 
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> ItemProperties.register(
-                ModItems.POUCH.get(),
-                ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened"),
-                (stack, level, entity, seed) -> {
-                    Minecraft minecraft = Minecraft.getInstance();
-                    if (minecraft.player == null || !(minecraft.player.containerMenu instanceof PouchMenu pouchMenu)) {
-                        return 0.0F;
-                    }
-
-                    int slot = pouchMenu.pouchInventorySlot();
-                    if (slot < 0 || slot >= minecraft.player.getInventory().getContainerSize()) {
-                        return 0.0F;
-                    }
-
-                    return stack == minecraft.player.getInventory().getItem(slot) ? 1.0F : 0.0F;
-                }
-        ));
+        event.enqueueWork(() -> {
+            ItemProperties.register(
+                    ModItems.POUCH.get(),
+                    ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened"),
+                    EmeraldPouchClient::openedProperty
+            );
+            ItemProperties.register(
+                    ModItems.LARGE_POUCH.get(),
+                    ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened"),
+                    EmeraldPouchClient::openedProperty
+            );
+        });
     }
 
     public static void onClientTick(ClientTickEvent.Post event) {
@@ -56,5 +51,19 @@ public final class EmeraldPouchClient {
         while (ModKeyMappings.OPEN_FIRST_POUCH.consumeClick()) {
             PacketDistributor.sendToServer(new OpenFirstPouchPayload());
         }
+    }
+
+    private static float openedProperty(net.minecraft.world.item.ItemStack stack, net.minecraft.client.multiplayer.ClientLevel level, net.minecraft.world.entity.LivingEntity entity, int seed) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || !(minecraft.player.containerMenu instanceof PouchMenu pouchMenu)) {
+            return 0.0F;
+        }
+
+        int slot = pouchMenu.pouchInventorySlot();
+        if (slot < 0 || slot >= minecraft.player.getInventory().getContainerSize()) {
+            return 0.0F;
+        }
+
+        return stack == minecraft.player.getInventory().getItem(slot) ? 1.0F : 0.0F;
     }
 }
