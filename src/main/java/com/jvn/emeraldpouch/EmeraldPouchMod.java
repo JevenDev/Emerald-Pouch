@@ -1,11 +1,13 @@
 package com.jvn.emeraldpouch;
 
 import com.jvn.emeraldpouch.event.AutoPickupHandler;
+import com.jvn.emeraldpouch.event.PouchUseHandler;
 import com.jvn.emeraldpouch.network.ModNetwork;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -27,6 +29,7 @@ public final class EmeraldPouchMod {
         modEventBus.addListener(this::addCreativeTabItems);
         modEventBus.addListener(ModNetwork::registerPayloadHandlers);
         NeoForge.EVENT_BUS.addListener(AutoPickupHandler::onItemEntityPickupPost);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, PouchUseHandler::onRightClickItem);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::registerScreens);
             modEventBus.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::registerKeyMappings);

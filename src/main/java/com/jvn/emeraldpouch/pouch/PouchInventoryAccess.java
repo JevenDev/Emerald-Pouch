@@ -1,5 +1,6 @@
 package com.jvn.emeraldpouch.pouch;
 
+import com.jvn.emeraldpouch.compat.AccessoriesCompat;
 import com.jvn.emeraldpouch.compat.CuriosCompat;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,20 +13,9 @@ public final class PouchInventoryAccess {
     }
 
     public static Optional<PouchStackReference> findFirstPouch(Inventory inventory) {
-        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
-            if (PouchData.isPouchStack(inventory.getItem(slot))) {
-                return Optional.of(PouchStackReference.inventory(slot));
-            }
-        }
-
-        if (PouchData.isPouchStack(inventory.getItem(Inventory.SLOT_OFFHAND))) {
-            return Optional.of(PouchStackReference.inventory(Inventory.SLOT_OFFHAND));
-        }
-
-        int curiosSlots = CuriosCompat.getSlotCount(inventory.player);
-        for (int slot = 0; slot < curiosSlots; slot++) {
-            if (PouchData.isPouchStack(CuriosCompat.getStackInSlot(inventory.player, slot))) {
-                return Optional.of(PouchStackReference.curios(slot));
+        for (PouchStackReference reference : getDeterministicPouchReferences(inventory)) {
+            if (PouchData.isPouchStack(getPouchStack(inventory, reference))) {
+                return Optional.of(reference);
             }
         }
 
@@ -121,9 +111,18 @@ public final class PouchInventoryAccess {
     public static List<PouchStackReference> getDeterministicPouchReferences(Inventory inventory) {
         List<PouchStackReference> references = new ArrayList<>();
 
-        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
-            if (PouchData.isPouchStack(inventory.getItem(slot))) {
-                references.add(PouchStackReference.inventory(slot));
+        // Prioritize equipped slot pouches over inventory pouches.
+        int accessoriesBeltSlots = AccessoriesCompat.getBeltSlotCount(inventory.player);
+        for (int slot = 0; slot < accessoriesBeltSlots; slot++) {
+            if (PouchData.isPouchStack(AccessoriesCompat.getBeltStackInSlot(inventory.player, slot))) {
+                references.add(PouchStackReference.accessoriesBelt(slot));
+            }
+        }
+
+        int curiosSlots = CuriosCompat.getSlotCount(inventory.player);
+        for (int slot = 0; slot < curiosSlots; slot++) {
+            if (PouchData.isPouchStack(CuriosCompat.getStackInSlot(inventory.player, slot))) {
+                references.add(PouchStackReference.curios(slot));
             }
         }
 
@@ -131,10 +130,9 @@ public final class PouchInventoryAccess {
             references.add(PouchStackReference.inventory(Inventory.SLOT_OFFHAND));
         }
 
-        int curiosSlots = CuriosCompat.getSlotCount(inventory.player);
-        for (int slot = 0; slot < curiosSlots; slot++) {
-            if (PouchData.isPouchStack(CuriosCompat.getStackInSlot(inventory.player, slot))) {
-                references.add(PouchStackReference.curios(slot));
+        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
+            if (PouchData.isPouchStack(inventory.getItem(slot))) {
+                references.add(PouchStackReference.inventory(slot));
             }
         }
 
@@ -148,6 +146,10 @@ public final class PouchInventoryAccess {
                 return ItemStack.EMPTY;
             }
             return inventory.getItem(slot);
+        }
+
+        if (reference.type() == PouchStackReference.Type.ACCESSORIES_BELT) {
+            return AccessoriesCompat.getBeltStackInSlot(inventory.player, reference.slot());
         }
 
         return CuriosCompat.getStackInSlot(inventory.player, reference.slot());
@@ -165,7 +167,11 @@ public final class PouchInventoryAccess {
             return;
         }
 
-        CuriosCompat.setStackInSlot(inventory.player, reference.slot(), stack);
+        if (reference.type() == PouchStackReference.Type.ACCESSORIES_BELT) {
+            AccessoriesCompat.setBeltStackInSlot(inventory.player, reference.slot(), stack);
+        } else {
+            CuriosCompat.setStackInSlot(inventory.player, reference.slot(), stack);
+        }
         inventory.setChanged();
     }
 }
