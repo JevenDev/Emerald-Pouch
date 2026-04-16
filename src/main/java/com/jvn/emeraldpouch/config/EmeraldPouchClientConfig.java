@@ -22,6 +22,37 @@ public final class EmeraldPouchClientConfig {
         }
     }
 
+    public enum HudIconColor implements TranslatableEnum {
+        EMERALD("emeraldpouch.configuration.hud_icon_color.emerald"),
+        BLACK("emeraldpouch.configuration.hud_icon_color.black"),
+        BLUE("emeraldpouch.configuration.hud_icon_color.blue"),
+        BROWN("emeraldpouch.configuration.hud_icon_color.brown"),
+        CYAN("emeraldpouch.configuration.hud_icon_color.cyan"),
+        GRAY("emeraldpouch.configuration.hud_icon_color.gray"),
+        GREEN("emeraldpouch.configuration.hud_icon_color.green"),
+        LIGHT_BLUE("emeraldpouch.configuration.hud_icon_color.light_blue"),
+        LIGHT_GRAY("emeraldpouch.configuration.hud_icon_color.light_gray"),
+        LIME("emeraldpouch.configuration.hud_icon_color.lime"),
+        MAGENTA("emeraldpouch.configuration.hud_icon_color.magenta"),
+        ORANGE("emeraldpouch.configuration.hud_icon_color.orange"),
+        PINK("emeraldpouch.configuration.hud_icon_color.pink"),
+        PURPLE("emeraldpouch.configuration.hud_icon_color.purple"),
+        RED("emeraldpouch.configuration.hud_icon_color.red"),
+        WHITE("emeraldpouch.configuration.hud_icon_color.white"),
+        YELLOW("emeraldpouch.configuration.hud_icon_color.yellow");
+
+        private final String translationKey;
+
+        HudIconColor(String translationKey) {
+            this.translationKey = translationKey;
+        }
+
+        @Override
+        public Component getTranslatedName() {
+            return Component.translatable(this.translationKey);
+        }
+    }
+
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.EnumValue<HudPosition> HUD_POSITION = BUILDER
@@ -37,6 +68,10 @@ public final class EmeraldPouchClientConfig {
             .translation("emeraldpouch.configuration.show_bundle_count_overlay")
             .comment("Render total pouch count centered on top of the pouch HUD icon.")
             .define("showBundleCountOverlay", false);
+    private static final ModConfigSpec.EnumValue<HudIconColor> HUD_ICON_COLOR = BUILDER
+            .translation("emeraldpouch.configuration.hud_icon_color")
+            .comment("Choose which pouch color to render for HUD and inventory indicators.")
+            .defineEnum("hudIconColor", HudIconColor.EMERALD);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -49,5 +84,9 @@ public final class EmeraldPouchClientConfig {
 
     public static boolean showBundleCountOverlay() {
         return SHOW_BUNDLE_COUNT_OVERLAY.get();
+    }
+
+    public static HudIconColor hudIconColor() {
+        return HUD_ICON_COLOR.get();
     }
 }
