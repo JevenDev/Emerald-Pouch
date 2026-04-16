@@ -16,6 +16,7 @@ public final class PouchData {
     public static final String POUCH_TAG = "EmeraldPouch";
     public static final String AUTO_COMPACT_TAG = "AutoCompact";
     public static final String AUTO_PICKUP_TAG = "AutoPickup";
+    public static final String OPENED_VISUAL_TAG = "OpenedVisual";
 
     private PouchData() {
     }
@@ -91,6 +92,14 @@ public final class PouchData {
 
     public static void toggleAutoPickup(ItemStack pouchStack) {
         setAutoPickupEnabled(pouchStack, !isAutoPickupEnabled(pouchStack));
+    }
+
+    public static boolean isOpenedVisualEnabled(ItemStack pouchStack) {
+        return readToggle(pouchStack, OPENED_VISUAL_TAG);
+    }
+
+    public static void setOpenedVisualEnabled(ItemStack pouchStack, boolean enabled) {
+        writeToggle(pouchStack, OPENED_VISUAL_TAG, enabled);
     }
 
     public static ItemStack insertIntoPouch(ItemStack pouchStack, ItemStack incoming, int maxToInsert) {
@@ -231,6 +240,25 @@ public final class PouchData {
             }
         }
         return total;
+    }
+
+    public static boolean hasAllSlotsOccupied(ItemStack pouchStack) {
+        int slotCount = getSlotCount(pouchStack);
+        if (slotCount <= 0) {
+            return false;
+        }
+
+        ItemContainerContents contents = pouchStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+        if (contents.getSlots() < slotCount) {
+            return false;
+        }
+
+        for (int slot = 0; slot < slotCount; slot++) {
+            if (contents.getStackInSlot(slot).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean readToggle(ItemStack pouchStack, String key) {

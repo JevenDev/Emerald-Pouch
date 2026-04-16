@@ -102,6 +102,15 @@ public final class PouchInventoryAccess {
         return slots;
     }
 
+    public static void clearOpenedVisualFlags(Inventory inventory) {
+        for (int pouchSlot : getDeterministicPouchSlots(inventory)) {
+            ItemStack pouchStack = inventory.getItem(pouchSlot);
+            if (PouchData.isOpenedVisualEnabled(pouchStack)) {
+                PouchData.setOpenedVisualEnabled(pouchStack, false);
+            }
+        }
+    }
+
     public static List<Integer> getDeterministicInventorySlots() {
         List<Integer> slots = new ArrayList<>(Inventory.INVENTORY_SIZE + 1);
         for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {

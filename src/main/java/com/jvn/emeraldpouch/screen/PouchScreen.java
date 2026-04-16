@@ -2,12 +2,15 @@ package com.jvn.emeraldpouch.screen;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.menu.PouchMenu;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
@@ -34,6 +37,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     private final int rows;
     private Button compactButton;
     private Button pickupButton;
+    private boolean openSoundPlayed;
 
     public PouchScreen(PouchMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -45,6 +49,8 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     @Override
     protected void init() {
         super.init();
+
+        playOpenSoundIfNeeded();
 
         int pickupX = this.leftPos + this.imageWidth - BUTTON_RIGHT_MARGIN - BUTTON_SIZE;
         int compactX = pickupX - BUTTON_GAP - BUTTON_SIZE;
@@ -95,6 +101,15 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     }
 
     @Override
+    public void onClose() {
+        Minecraft minecraft = this.minecraft;
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_REMOVE_ONE, 1.0F, 0.5F));
+        }
+        super.onClose();
+    }
+
+    @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
         int left = (this.width - this.imageWidth) / 2;
         int top = (this.height - this.imageHeight) / 2;
@@ -115,6 +130,18 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
 
         if (pickupButton != null) {
             pickupButton.setTooltip(Tooltip.create(PICKUP_NAME));
+        }
+    }
+
+    private void playOpenSoundIfNeeded() {
+        if (openSoundPlayed) {
+            return;
+        }
+
+        Minecraft minecraft = this.minecraft;
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_INSERT, 1.0F, 0.5F));
+            openSoundPlayed = true;
         }
     }
 }
