@@ -1,5 +1,6 @@
 package com.jvn.emeraldpouch.screen;
 
+import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.menu.PouchMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,8 +12,24 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
-    private static final Component COMPACT_LABEL = Component.literal("C");
-    private static final Component PICKUP_LABEL = Component.literal("P");
+    private static final int BUTTON_SIZE = 12;
+    private static final int BUTTON_GAP = 1;
+    private static final int BUTTON_RIGHT_MARGIN = 7;
+    private static final int BUTTON_TOP_MARGIN = 4;
+    private static final ResourceLocation COMPACT_DEFAULT =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button");
+    private static final ResourceLocation COMPACT_SELECTED =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button_selected");
+    private static final ResourceLocation COMPACT_HOVER =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button_hover");
+    private static final ResourceLocation PICKUP_DEFAULT =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button");
+    private static final ResourceLocation PICKUP_SELECTED =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button_selected");
+    private static final ResourceLocation PICKUP_HOVER =
+            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button_hover");
+    private static final Component COMPACT_NAME = Component.translatable("screen.emeraldpouch.auto_compact.name");
+    private static final Component PICKUP_NAME = Component.translatable("screen.emeraldpouch.auto_pickup.name");
 
     private final int rows;
     private Button compactButton;
@@ -29,16 +46,36 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     protected void init() {
         super.init();
 
+        int pickupX = this.leftPos + this.imageWidth - BUTTON_RIGHT_MARGIN - BUTTON_SIZE;
+        int compactX = pickupX - BUTTON_GAP - BUTTON_SIZE;
+        int buttonY = this.topPos + BUTTON_TOP_MARGIN;
+
         this.compactButton = addRenderableWidget(
-                Button.builder(COMPACT_LABEL, button -> pressToggle(PouchMenu.BUTTON_TOGGLE_AUTO_COMPACT))
-                        .bounds(this.leftPos + this.imageWidth - 42, this.topPos + 5, 18, 18)
-                        .build()
+                new PouchToggleIconButton(
+                        compactX,
+                        buttonY,
+                        BUTTON_SIZE,
+                        COMPACT_DEFAULT,
+                        COMPACT_SELECTED,
+                        COMPACT_HOVER,
+                        this.menu::isAutoCompactEnabled,
+                        button -> pressToggle(PouchMenu.BUTTON_TOGGLE_AUTO_COMPACT),
+                        COMPACT_NAME
+                )
         );
 
         this.pickupButton = addRenderableWidget(
-                Button.builder(PICKUP_LABEL, button -> pressToggle(PouchMenu.BUTTON_TOGGLE_AUTO_PICKUP))
-                        .bounds(this.leftPos + this.imageWidth - 22, this.topPos + 5, 18, 18)
-                        .build()
+                new PouchToggleIconButton(
+                        pickupX,
+                        buttonY,
+                        BUTTON_SIZE,
+                        PICKUP_DEFAULT,
+                        PICKUP_SELECTED,
+                        PICKUP_HOVER,
+                        this.menu::isAutoPickupEnabled,
+                        button -> pressToggle(PouchMenu.BUTTON_TOGGLE_AUTO_PICKUP),
+                        PICKUP_NAME
+                )
         );
 
         refreshButtonTooltips();
@@ -73,19 +110,11 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
 
     private void refreshButtonTooltips() {
         if (compactButton != null) {
-            compactButton.setTooltip(Tooltip.create(Component.translatable(
-                    this.menu.isAutoCompactEnabled()
-                            ? "screen.emeraldpouch.auto_compact.on"
-                            : "screen.emeraldpouch.auto_compact.off"
-            )));
+            compactButton.setTooltip(Tooltip.create(COMPACT_NAME));
         }
 
         if (pickupButton != null) {
-            pickupButton.setTooltip(Tooltip.create(Component.translatable(
-                    this.menu.isAutoPickupEnabled()
-                            ? "screen.emeraldpouch.auto_pickup.on"
-                            : "screen.emeraldpouch.auto_pickup.off"
-            )));
+            pickupButton.setTooltip(Tooltip.create(PICKUP_NAME));
         }
     }
 }

@@ -1,9 +1,11 @@
 package com.jvn.emeraldpouch.item;
 
+import com.jvn.emeraldpouch.compat.ModCompat;
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
 import java.util.List;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -16,6 +18,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.component.ItemContainerContents;
 
 public class PouchItem extends Item {
     private final int slotCount;
@@ -117,11 +120,27 @@ public class PouchItem extends Item {
                         : "tooltip.emeraldpouch.state.off"
         );
 
-        tooltipComponents.add(Component.translatable(
-                "tooltip.emeraldpouch.stored_emeralds",
-                PouchData.getStoredEmeraldEquivalent(stack)
-        ).withStyle(ChatFormatting.GRAY));
-        tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_compact", compactState).withStyle(ChatFormatting.GRAY));
-        tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_pickup", pickupState).withStyle(ChatFormatting.GRAY));
+        if (tooltipFlag.hasShiftDown()) {
+            tooltipComponents.add(Component.translatable(
+                    "tooltip.emeraldpouch.stored_emeralds",
+                    PouchData.getStoredEmeraldEquivalent(stack)
+            ).withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_compact", compactState).withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_pickup", pickupState).withStyle(ChatFormatting.GRAY));
+        } else if (!ModCompat.isShulkerTooltipLoaded()) {
+            int shown = 0;
+            int total = 0;
+            ItemContainerContents contents = stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+            for (ItemStack stored : contents.nonEmptyItems()) {
+                total++;
+                if (shown < 5) {
+                    shown++;
+                    tooltipComponents.add(Component.translatable("container.shulkerBox.itemCount", stored.getHoverName(), stored.getCount()));
+                }
+            }
+            if (total - shown > 0) {
+                tooltipComponents.add(Component.translatable("container.shulkerBox.more", total - shown).withStyle(ChatFormatting.ITALIC));
+            }
+        }
     }
 }
