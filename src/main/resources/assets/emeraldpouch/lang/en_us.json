@@ -8,6 +8,8 @@
   "screen.emeraldpouch.auto_compact.off": "Auto-compact: OFF",
   "screen.emeraldpouch.auto_pickup.on": "Auto-pickup: ON",
   "screen.emeraldpouch.auto_pickup.off": "Auto-pickup: OFF",
+  "screen.emeraldpouch.auto_compact.name": "Auto-compact",
+  "screen.emeraldpouch.auto_pickup.name": "Auto-pickup",
   "tooltip.emeraldpouch.stored_emeralds": "Stored emeralds: %s",
   "tooltip.emeraldpouch.auto_compact": "Auto-compact: %s",
   "tooltip.emeraldpouch.auto_pickup": "Auto-pickup: %s",
