@@ -1,44 +1,122 @@
 package com.jvn.emeraldpouch.menu;
 
+import com.jvn.emeraldpouch.pouch.PouchData;
+import com.jvn.emeraldpouch.pouch.PouchItemContainer;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class PouchMenu extends AbstractContainerMenu {
-    private static final int HOTBAR_SLOT_COUNT = 9;
-    private static final int PLAYER_INVENTORY_ROW_COUNT = 3;
-    private static final int PLAYER_INVENTORY_COLUMN_COUNT = 9;
-    private static final int PLAYER_INVENTORY_SLOT_COUNT = PLAYER_INVENTORY_ROW_COUNT * PLAYER_INVENTORY_COLUMN_COUNT;
+    public static final int BUTTON_TOGGLE_AUTO_COMPACT = 0;
+    public static final int BUTTON_TOGGLE_AUTO_PICKUP = 1;
 
+    private static final int HOTBAR_SLOT_COUNT = 9;
+
+    private final Inventory playerInventory;
+    private final PouchItemContainer pouchContainer;
+    private final Item pouchItem;
+    private final int pouchInventorySlot;
     private final int storageSlotCount;
     private final int storageRows;
+    private final ContainerData toggleData;
 
     public PouchMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf extraData) {
-        this(containerId, playerInventory, Math.max(9, extraData.readVarInt()));
+        this(containerId, playerInventory, extraData.readVarInt(), extraData.readVarInt());
     }
 
-    public PouchMenu(int containerId, Inventory playerInventory, int storageSlotCount) {
+    public PouchMenu(int containerId, Inventory playerInventory, int pouchInventorySlot, int storageSlotCount) {
         super(ModMenus.POUCH_MENU.get(), containerId);
-        this.storageSlotCount = storageSlotCount;
-        this.storageRows = Math.max(1, (storageSlotCount + 8) / 9);
-        addPlayerSlots(playerInventory, 8 + this.storageRows * 18 + 17);
-    }
+        this.playerInventory = playerInventory;
+        this.pouchInventorySlot = pouchInventorySlot;
+        this.storageSlotCount = Math.max(0, storageSlotCount);
+        this.storageRows = Math.max(1, (this.storageSlotCount + 8) / 9);
 
-    public int storageSlotCount() {
-        return storageSlotCount;
+        ItemStack pouchStack = getCurrentPouchStack();
+        this.pouchItem = pouchStack.getItem();
+        this.pouchContainer = new PouchItemContainer(pouchStack, this.storageSlotCount);
+        this.pouchContainer.setChangeListener(() -> this.slotsChanged(this.pouchContainer));
+
+        this.toggleData = new SimpleContainerData(2);
+        addDataSlots(this.toggleData);
+        syncToggleDataFromStack();
+
+        addPouchSlots();
+        addPlayerSlots();
     }
 
     public int storageRows() {
         return storageRows;
     }
 
+    public int storageSlotCount() {
+        return storageSlotCount;
+    }
+
+    public int pouchInventorySlot() {
+        return pouchInventorySlot;
+    }
+
+    public boolean isAutoCompactEnabled() {
+        return toggleData.get(0) != 0;
+    }
+
+    public boolean isAutoPickupEnabled() {
+        return toggleData.get(1) != 0;
+    }
+
     @Override
     public boolean stillValid(Player player) {
-        return true;
+        if (!player.isAlive()) {
+            return false;
+        }
+
+        ItemStack currentStack = getCurrentPouchStack();
+        return !currentStack.isEmpty()
+                && currentStack.getItem() == this.pouchItem
+                && PouchData.getSlotCount(currentStack) == this.storageSlotCount;
+    }
+
+    @Override
+    public boolean clickMenuButton(Player player, int id) {
+        ItemStack pouchStack = getCurrentPouchStack();
+        if (!PouchData.isPouchStack(pouchStack)) {
+            return false;
+        }
+
+        if (id == BUTTON_TOGGLE_AUTO_COMPACT) {
+            PouchData.toggleAutoCompact(pouchStack);
+            syncToggleDataFromStack();
+            return true;
+        }
+
+        if (id == BUTTON_TOGGLE_AUTO_PICKUP) {
+            PouchData.toggleAutoPickup(pouchStack);
+            syncToggleDataFromStack();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void clicked(int slotId, int button, ClickType clickType, Player player) {
+        if (clickType == ClickType.SWAP && button == this.pouchInventorySlot) {
+            return;
+        }
+        super.clicked(slotId, button, clickType, player);
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        this.pouchContainer.setChanged();
     }
 
     @Override
@@ -46,20 +124,48 @@ public class PouchMenu extends AbstractContainerMenu {
         return ItemStack.EMPTY;
     }
 
-    private void addPlayerSlots(Inventory playerInventory, int topY) {
-        int inventoryY = topY + 14;
-        for (int row = 0; row < PLAYER_INVENTORY_ROW_COUNT; row++) {
-            for (int column = 0; column < PLAYER_INVENTORY_COLUMN_COUNT; column++) {
-                int slotIndex = column + row * PLAYER_INVENTORY_COLUMN_COUNT + HOTBAR_SLOT_COUNT;
+    private void addPouchSlots() {
+        for (int row = 0; row < storageRows; row++) {
+            for (int column = 0; column < 9; column++) {
+                int slot = column + row * 9;
+                if (slot >= storageSlotCount) {
+                    return;
+                }
+
+                addSlot(new PouchStorageSlot(pouchContainer, slot, 8 + column * 18, 18 + row * 18));
+            }
+        }
+    }
+
+    private void addPlayerSlots() {
+        int verticalOffset = (this.storageRows - 4) * 18;
+
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 9; column++) {
+                int slot = column + row * 9 + HOTBAR_SLOT_COUNT;
                 int x = 8 + column * 18;
-                int y = inventoryY + row * 18;
-                this.addSlot(new Slot(playerInventory, slotIndex, x, y));
+                int y = 103 + row * 18 + verticalOffset;
+                addSlot(new LockedPlayerInventorySlot(playerInventory, slot, x, y, pouchInventorySlot));
             }
         }
 
-        int hotbarY = inventoryY + PLAYER_INVENTORY_ROW_COUNT * 18 + 4;
         for (int slot = 0; slot < HOTBAR_SLOT_COUNT; slot++) {
-            this.addSlot(new Slot(playerInventory, slot, 8 + slot * 18, hotbarY));
+            int x = 8 + slot * 18;
+            int y = 161 + verticalOffset;
+            addSlot(new LockedPlayerInventorySlot(playerInventory, slot, x, y, pouchInventorySlot));
         }
+    }
+
+    private ItemStack getCurrentPouchStack() {
+        if (pouchInventorySlot < 0 || pouchInventorySlot >= playerInventory.getContainerSize()) {
+            return ItemStack.EMPTY;
+        }
+        return playerInventory.getItem(pouchInventorySlot);
+    }
+
+    private void syncToggleDataFromStack() {
+        ItemStack pouchStack = getCurrentPouchStack();
+        this.toggleData.set(0, PouchData.isAutoCompactEnabled(pouchStack) ? 1 : 0);
+        this.toggleData.set(1, PouchData.isAutoPickupEnabled(pouchStack) ? 1 : 0);
     }
 }

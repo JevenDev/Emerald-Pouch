@@ -3,5 +3,9 @@
   "item.emeraldpouch.large_pouch": "Large Pouch",
   "container.emeraldpouch.pouch": "Emerald Pouch",
   "key.categories.emeraldpouch": "Emerald Pouch",
-  "key.emeraldpouch.open_first_pouch": "Open First Pouch"
+  "key.emeraldpouch.open_first_pouch": "Open First Pouch",
+  "screen.emeraldpouch.auto_compact.on": "Auto-compact: ON",
+  "screen.emeraldpouch.auto_compact.off": "Auto-compact: OFF",
+  "screen.emeraldpouch.auto_pickup.on": "Auto-pickup: ON",
+  "screen.emeraldpouch.auto_pickup.off": "Auto-pickup: OFF"
 }
