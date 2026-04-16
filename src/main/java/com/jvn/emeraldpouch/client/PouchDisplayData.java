@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch.client;
 
 import com.jvn.emeraldpouch.pouch.PouchData;
+import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
 import java.util.Locale;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -18,20 +19,14 @@ public record PouchDisplayData(long totalEmeraldEquivalent, int pouchCount) {
         long totalEmeralds = 0L;
         int totalPouches = 0;
 
-        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
-            ItemStack stack = inventory.getItem(slot);
+        for (var reference : PouchInventoryAccess.getDeterministicPouchReferences(inventory)) {
+            ItemStack stack = PouchInventoryAccess.getPouchStack(inventory, reference);
             if (!PouchData.isPouchStack(stack)) {
                 continue;
             }
 
             totalPouches++;
             totalEmeralds += PouchData.getStoredEmeraldEquivalent(stack);
-        }
-
-        ItemStack offhand = inventory.getItem(Inventory.SLOT_OFFHAND);
-        if (PouchData.isPouchStack(offhand)) {
-            totalPouches++;
-            totalEmeralds += PouchData.getStoredEmeraldEquivalent(offhand);
         }
 
         if (totalPouches <= 0) {
