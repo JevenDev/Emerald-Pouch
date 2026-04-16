@@ -18,29 +18,42 @@ public final class PouchMenuOpener {
     }
 
     public static boolean openFromInventorySlot(ServerPlayer player, int inventorySlot) {
+        return openFromReference(player, PouchStackReference.inventory(inventorySlot));
+    }
+
+    public static boolean openFromReference(ServerPlayer player, PouchStackReference reference) {
         Inventory inventory = player.getInventory();
-        ItemStack pouchStack = inventory.getItem(inventorySlot);
+        ItemStack pouchStack = PouchInventoryAccess.getPouchStack(inventory, reference);
         if (!PouchData.isPouchStack(pouchStack)) {
             return false;
         }
 
         PouchInventoryAccess.clearOpenedVisualFlags(inventory);
         PouchData.setOpenedVisualEnabled(pouchStack, true);
+        PouchInventoryAccess.commitPouchStack(inventory, reference, pouchStack);
 
         int slotCount = PouchData.getSlotCount(pouchStack);
         OptionalInt menuId = player.openMenu(
                 new SimpleMenuProvider(
-                        (containerId, playerInventory, menuPlayer) -> new PouchMenu(containerId, playerInventory, inventorySlot, slotCount),
+                        (containerId, playerInventory, menuPlayer) -> new PouchMenu(
+                                containerId,
+                                playerInventory,
+                                reference.type(),
+                                reference.slot(),
+                                slotCount
+                        ),
                         pouchStack.getHoverName()
                 ),
                 extraData -> {
-                    extraData.writeVarInt(inventorySlot);
+                    extraData.writeVarInt(reference.type().networkId());
+                    extraData.writeVarInt(reference.slot());
                     extraData.writeVarInt(slotCount);
                 }
         );
 
         if (menuId.isEmpty()) {
             PouchData.setOpenedVisualEnabled(pouchStack, false);
+            PouchInventoryAccess.commitPouchStack(inventory, reference, pouchStack);
         }
 
         return menuId.isPresent();

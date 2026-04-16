@@ -122,6 +122,10 @@ public class PouchItemContainer implements Container {
         return items;
     }
 
+    public ItemStack getPouchStack() {
+        return pouchStack;
+    }
+
     public ItemStack insert(ItemStack stack, int maxToInsert) {
         if (stack.isEmpty() || maxToInsert <= 0 || !PouchData.isAllowedContent(stack)) {
             return stack.copy();
