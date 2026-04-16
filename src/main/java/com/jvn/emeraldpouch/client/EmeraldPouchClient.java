@@ -37,7 +37,7 @@ public final class EmeraldPouchClient {
     private static final int HUD_ICON_SIZE = 16;
     private static final int XP_TEXT_COLOR = 8453920;
     private static final int WHITE_TEXT_COLOR = 16777215;
-    private static final int TEXT_ICON_GAP = 0;
+    private static final int TEXT_ICON_GAP = 1;
     private static final int HOTBAR_HALF_WIDTH = 91;
     private static final int POSITION_1_SIDE_MARGIN = 1;
     private static final int POSITION_2_SIDE_MARGIN = 1;
