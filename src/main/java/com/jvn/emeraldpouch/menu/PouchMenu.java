@@ -10,6 +10,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -121,7 +122,43 @@ public class PouchMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        return ItemStack.EMPTY;
+        if (index < 0 || index >= this.slots.size()) {
+            return ItemStack.EMPTY;
+        }
+
+        Slot slot = this.slots.get(index);
+        if (!slot.hasItem()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack slotStack = slot.getItem();
+        ItemStack originalCopy = slotStack.copy();
+        if (index < this.storageSlotCount) {
+            if (!moveItemStackTo(slotStack, this.storageSlotCount, this.slots.size(), true)) {
+                return ItemStack.EMPTY;
+            }
+        } else {
+            if (!PouchData.isAllowedContent(slotStack)) {
+                return ItemStack.EMPTY;
+            }
+
+            if (!moveItemStackTo(slotStack, 0, this.storageSlotCount, false)) {
+                return ItemStack.EMPTY;
+            }
+        }
+
+        if (slotStack.isEmpty()) {
+            slot.setByPlayer(ItemStack.EMPTY);
+        } else {
+            slot.setChanged();
+        }
+
+        if (slotStack.getCount() == originalCopy.getCount()) {
+            return ItemStack.EMPTY;
+        }
+
+        slot.onTake(player, slotStack);
+        return originalCopy;
     }
 
     private void addPouchSlots() {
