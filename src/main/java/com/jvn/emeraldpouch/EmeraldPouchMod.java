@@ -30,6 +30,7 @@ public final class EmeraldPouchMod {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::registerScreens);
             modEventBus.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::registerKeyMappings);
+            NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onClientTick);
         }
     }
 
