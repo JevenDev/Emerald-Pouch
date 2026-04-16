@@ -122,7 +122,7 @@ public final class PouchData {
                 continue;
             }
 
-            int maxStack = Math.min(current.getMaxStackSize(), contents.get(slot).getMaxStackSize());
+            int maxStack = current.getMaxStackSize();
             int move = Math.min(remaining, maxStack - current.getCount());
             if (move <= 0) {
                 continue;
@@ -156,6 +156,7 @@ public final class PouchData {
     }
 
     public static boolean compactContents(List<ItemStack> contents) {
+        int emeraldBlockMaxStack = Items.EMERALD_BLOCK.getDefaultInstance().getMaxStackSize();
         int emeraldCount = 0;
         int blockSpace = 0;
         for (ItemStack stack : contents) {
@@ -164,7 +165,7 @@ public final class PouchData {
             } else if (stack.is(Items.EMERALD_BLOCK)) {
                 blockSpace += stack.getMaxStackSize() - stack.getCount();
             } else if (stack.isEmpty()) {
-                blockSpace += Items.EMERALD_BLOCK.getDefaultInstance().getMaxStackSize();
+                blockSpace += emeraldBlockMaxStack;
             }
         }
 
@@ -215,7 +216,7 @@ public final class PouchData {
                 continue;
             }
 
-            int move = Math.min(blocksToInsert, Items.EMERALD_BLOCK.getDefaultInstance().getMaxStackSize());
+            int move = Math.min(blocksToInsert, emeraldBlockMaxStack);
             contents.set(i, new ItemStack(Items.EMERALD_BLOCK, move));
             blocksToInsert -= move;
         }

@@ -13,7 +13,6 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class PouchMenu extends AbstractContainerMenu {
@@ -24,7 +23,6 @@ public class PouchMenu extends AbstractContainerMenu {
 
     private final Inventory playerInventory;
     private final PouchItemContainer pouchContainer;
-    private final Item pouchItem;
     private final PouchStackReference pouchReference;
     private final int lockedInventorySlot;
     private final int storageSlotCount;
@@ -56,7 +54,6 @@ public class PouchMenu extends AbstractContainerMenu {
         this.storageRows = Math.max(1, (this.storageSlotCount + 8) / 9);
 
         ItemStack pouchStack = getCurrentPouchStack();
-        this.pouchItem = pouchStack.getItem();
         this.pouchContainer = new PouchItemContainer(pouchStack, this.storageSlotCount);
         this.pouchContainer.setChangeListener(this::onPouchContainerChanged);
 
@@ -91,8 +88,9 @@ public class PouchMenu extends AbstractContainerMenu {
         }
 
         ItemStack currentStack = getCurrentPouchStack();
+        ItemStack backingStack = this.pouchContainer.getPouchStack();
         return !currentStack.isEmpty()
-                && currentStack.getItem() == this.pouchItem
+                && ItemStack.isSameItemSameComponents(currentStack, backingStack)
                 && PouchData.getSlotCount(currentStack) == this.storageSlotCount;
     }
 
@@ -136,7 +134,6 @@ public class PouchMenu extends AbstractContainerMenu {
             PouchInventoryAccess.commitPouchStack(this.playerInventory, this.pouchReference, pouchStack);
         }
         super.removed(player);
-        this.pouchContainer.setChanged();
     }
 
     @Override

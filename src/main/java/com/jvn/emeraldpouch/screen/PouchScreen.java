@@ -84,13 +84,8 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
                 )
         );
 
-        refreshButtonTooltips();
-    }
-
-    @Override
-    protected void containerTick() {
-        super.containerTick();
-        refreshButtonTooltips();
+        this.compactButton.setTooltip(Tooltip.create(COMPACT_NAME));
+        this.pickupButton.setTooltip(Tooltip.create(PICKUP_NAME));
     }
 
     @Override
@@ -120,16 +115,6 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     private void pressToggle(int toggleButtonId) {
         if (this.minecraft != null && this.minecraft.gameMode != null) {
             this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, toggleButtonId);
-        }
-    }
-
-    private void refreshButtonTooltips() {
-        if (compactButton != null) {
-            compactButton.setTooltip(Tooltip.create(COMPACT_NAME));
-        }
-
-        if (pickupButton != null) {
-            pickupButton.setTooltip(Tooltip.create(PICKUP_NAME));
         }
     }
 
