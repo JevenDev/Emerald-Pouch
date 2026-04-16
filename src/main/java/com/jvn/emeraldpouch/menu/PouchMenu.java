@@ -14,16 +14,22 @@ public class PouchMenu extends AbstractContainerMenu {
     private static final int PLAYER_INVENTORY_COLUMN_COUNT = 9;
     private static final int PLAYER_INVENTORY_SLOT_COUNT = PLAYER_INVENTORY_ROW_COUNT * PLAYER_INVENTORY_COLUMN_COUNT;
 
+    private final int storageSlotCount;
     private final int storageRows;
 
     public PouchMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf extraData) {
-        this(containerId, playerInventory, Math.max(1, extraData.readVarInt()));
+        this(containerId, playerInventory, Math.max(9, extraData.readVarInt()));
     }
 
-    public PouchMenu(int containerId, Inventory playerInventory, int storageRows) {
+    public PouchMenu(int containerId, Inventory playerInventory, int storageSlotCount) {
         super(ModMenus.POUCH_MENU.get(), containerId);
-        this.storageRows = storageRows;
+        this.storageSlotCount = storageSlotCount;
+        this.storageRows = Math.max(1, (storageSlotCount + 8) / 9);
         addPlayerSlots(playerInventory, 8 + this.storageRows * 18 + 17);
+    }
+
+    public int storageSlotCount() {
+        return storageSlotCount;
     }
 
     public int storageRows() {
