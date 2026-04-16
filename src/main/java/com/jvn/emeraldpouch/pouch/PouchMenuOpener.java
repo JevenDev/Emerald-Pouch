@@ -18,10 +18,14 @@ public final class PouchMenuOpener {
     }
 
     public static boolean openFromInventorySlot(ServerPlayer player, int inventorySlot) {
-        ItemStack pouchStack = player.getInventory().getItem(inventorySlot);
+        Inventory inventory = player.getInventory();
+        ItemStack pouchStack = inventory.getItem(inventorySlot);
         if (!PouchData.isPouchStack(pouchStack)) {
             return false;
         }
+
+        PouchInventoryAccess.clearOpenedVisualFlags(inventory);
+        PouchData.setOpenedVisualEnabled(pouchStack, true);
 
         int slotCount = PouchData.getSlotCount(pouchStack);
         OptionalInt menuId = player.openMenu(
@@ -34,6 +38,10 @@ public final class PouchMenuOpener {
                     extraData.writeVarInt(slotCount);
                 }
         );
+
+        if (menuId.isEmpty()) {
+            PouchData.setOpenedVisualEnabled(pouchStack, false);
+        }
 
         return menuId.isPresent();
     }

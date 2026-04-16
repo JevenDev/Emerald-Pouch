@@ -116,6 +116,10 @@ public class PouchMenu extends AbstractContainerMenu {
 
     @Override
     public void removed(Player player) {
+        ItemStack pouchStack = getCurrentPouchStack();
+        if (PouchData.isPouchStack(pouchStack)) {
+            PouchData.setOpenedVisualEnabled(pouchStack, false);
+        }
         super.removed(player);
         this.pouchContainer.setChanged();
     }
