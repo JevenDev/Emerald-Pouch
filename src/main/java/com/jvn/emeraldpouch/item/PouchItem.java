@@ -5,8 +5,11 @@ import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -38,5 +41,62 @@ public class PouchItem extends Item {
         }
 
         return InteractionResultHolder.sidedSuccess(heldStack, level.isClientSide());
+    }
+
+    @Override
+    public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
+        ItemStack slotStack = slot.getItem();
+        if (!PouchData.isAllowedContent(slotStack)) {
+            return false;
+        }
+
+        int requested = action == ClickAction.PRIMARY ? slotStack.getCount() : 1;
+        ItemStack extracted = slot.safeTake(requested, requested, player);
+        if (extracted.isEmpty()) {
+            return false;
+        }
+
+        ItemStack remainder = PouchData.insertIntoPouch(stack, extracted, extracted.getCount());
+        int inserted = extracted.getCount() - remainder.getCount();
+        if (inserted <= 0) {
+            ItemStack rollback = slot.safeInsert(extracted);
+            if (!rollback.isEmpty()) {
+                player.getInventory().placeItemBackInInventory(rollback);
+            }
+            return false;
+        }
+
+        if (!remainder.isEmpty()) {
+            ItemStack leftover = slot.safeInsert(remainder);
+            if (!leftover.isEmpty()) {
+                player.getInventory().placeItemBackInInventory(leftover);
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean overrideOtherStackedOnMe(
+            ItemStack stack,
+            ItemStack other,
+            Slot slot,
+            ClickAction action,
+            Player player,
+            SlotAccess access
+    ) {
+        if (!PouchData.isAllowedContent(other)) {
+            return false;
+        }
+
+        int requested = action == ClickAction.PRIMARY ? other.getCount() : 1;
+        ItemStack remainder = PouchData.insertIntoPouch(stack, other, requested);
+        int inserted = other.getCount() - remainder.getCount();
+        if (inserted <= 0) {
+            return false;
+        }
+
+        access.set(remainder);
+        return true;
     }
 }
