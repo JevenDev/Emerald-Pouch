@@ -117,7 +117,10 @@ public class PouchItem extends Item {
                         : "tooltip.emeraldpouch.state.off"
         );
 
-        tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.slots", this.slotCount).withStyle(ChatFormatting.GRAY));
+        tooltipComponents.add(Component.translatable(
+                "tooltip.emeraldpouch.stored_emeralds",
+                PouchData.getStoredEmeraldEquivalent(stack)
+        ).withStyle(ChatFormatting.GRAY));
         tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_compact", compactState).withStyle(ChatFormatting.GRAY));
         tooltipComponents.add(Component.translatable("tooltip.emeraldpouch.auto_pickup", pickupState).withStyle(ChatFormatting.GRAY));
     }
