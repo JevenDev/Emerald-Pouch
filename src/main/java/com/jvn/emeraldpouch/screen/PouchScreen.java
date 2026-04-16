@@ -2,6 +2,8 @@ package com.jvn.emeraldpouch.screen;
 
 import com.jvn.emeraldpouch.menu.PouchMenu;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -9,14 +11,43 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final Component COMPACT_LABEL = Component.literal("C");
+    private static final Component PICKUP_LABEL = Component.literal("P");
 
     private final int rows;
+    private Button compactButton;
+    private Button pickupButton;
 
     public PouchScreen(PouchMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.rows = menu.storageRows();
         this.imageHeight = 114 + this.rows * 18;
         this.inventoryLabelY = this.imageHeight - 94;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        this.compactButton = addRenderableWidget(
+                Button.builder(COMPACT_LABEL, button -> pressToggle(PouchMenu.BUTTON_TOGGLE_AUTO_COMPACT))
+                        .bounds(this.leftPos + this.imageWidth - 42, this.topPos + 5, 18, 18)
+                        .build()
+        );
+
+        this.pickupButton = addRenderableWidget(
+                Button.builder(PICKUP_LABEL, button -> pressToggle(PouchMenu.BUTTON_TOGGLE_AUTO_PICKUP))
+                        .bounds(this.leftPos + this.imageWidth - 22, this.topPos + 5, 18, 18)
+                        .build()
+        );
+
+        refreshButtonTooltips();
+    }
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        refreshButtonTooltips();
     }
 
     @Override
@@ -32,5 +63,29 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
         int top = (this.height - this.imageHeight) / 2;
         guiGraphics.blit(CONTAINER_BACKGROUND, left, top, 0, 0, this.imageWidth, this.rows * 18 + 17);
         guiGraphics.blit(CONTAINER_BACKGROUND, left, top + this.rows * 18 + 17, 0, 126, this.imageWidth, 96);
+    }
+
+    private void pressToggle(int toggleButtonId) {
+        if (this.minecraft != null && this.minecraft.gameMode != null) {
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, toggleButtonId);
+        }
+    }
+
+    private void refreshButtonTooltips() {
+        if (compactButton != null) {
+            compactButton.setTooltip(Tooltip.create(Component.translatable(
+                    this.menu.isAutoCompactEnabled()
+                            ? "screen.emeraldpouch.auto_compact.on"
+                            : "screen.emeraldpouch.auto_compact.off"
+            )));
+        }
+
+        if (pickupButton != null) {
+            pickupButton.setTooltip(Tooltip.create(Component.translatable(
+                    this.menu.isAutoPickupEnabled()
+                            ? "screen.emeraldpouch.auto_pickup.on"
+                            : "screen.emeraldpouch.auto_pickup.off"
+            )));
+        }
     }
 }

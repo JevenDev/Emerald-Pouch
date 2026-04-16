@@ -13,9 +13,9 @@ public class PouchItemContainer implements Container {
     private Runnable changeListener = () -> {
     };
 
-    public PouchItemContainer(ItemStack pouchStack) {
+    public PouchItemContainer(ItemStack pouchStack, int slotCount) {
         this.pouchStack = pouchStack;
-        this.slotCount = PouchData.getSlotCount(pouchStack);
+        this.slotCount = Math.max(slotCount, 0);
         this.items = PouchData.loadContents(pouchStack, this.slotCount);
     }
 
