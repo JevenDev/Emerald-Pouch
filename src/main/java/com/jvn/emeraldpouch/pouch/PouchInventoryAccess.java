@@ -5,8 +5,10 @@ import com.jvn.emeraldpouch.compat.CuriosCompat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public final class PouchInventoryAccess {
     private PouchInventoryAccess() {
@@ -101,6 +103,60 @@ public final class PouchInventoryAccess {
         return matcher.copyWithCount(extracted);
     }
 
+    public static ItemStack extractEmeraldsForTrade(Inventory inventory, int maxCount) {
+        if (maxCount <= 0) {
+            return ItemStack.EMPTY;
+        }
+
+        List<PouchStackReference> references = getDeterministicPouchReferences(inventory);
+        List<TradePouchState> tradePouches = collectTradePouches(inventory, references, maxCount);
+        if (tradePouches.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        int remaining = maxCount;
+        for (TradePouchState tradePouch : tradePouches) {
+            remaining = removeLooseEmeralds(tradePouch.contents(), remaining);
+            if (remaining <= 0) {
+                break;
+            }
+        }
+
+        int overflowStartIndex = tradePouches.getLast().referenceIndex();
+        if (remaining > 0) {
+            for (TradePouchState tradePouch : tradePouches) {
+                int previousRemaining = remaining;
+                remaining = removeEmeraldBlocks(tradePouch.contents(), remaining);
+                if (remaining != previousRemaining) {
+                    overflowStartIndex = tradePouch.referenceIndex();
+                }
+                if (remaining <= 0) {
+                    break;
+                }
+            }
+        }
+
+        if (remaining > 0) {
+            return ItemStack.EMPTY;
+        }
+
+        for (TradePouchState tradePouch : tradePouches) {
+            PouchData.saveContents(tradePouch.pouchStack(), tradePouch.contents());
+            commitPouchStack(inventory, tradePouch.reference(), tradePouch.pouchStack());
+        }
+
+        int overflowEmeralds = -remaining;
+        if (overflowEmeralds > 0) {
+            ItemStack overflow = new ItemStack(Items.EMERALD, overflowEmeralds);
+            overflow = insertIntoPouches(inventory, references, overflow, overflowStartIndex);
+            if (!overflow.isEmpty()) {
+                inventory.placeItemBackInInventory(overflow);
+            }
+        }
+
+        return new ItemStack(Items.EMERALD, maxCount);
+    }
+
     public static void clearOpenedVisualFlags(Inventory inventory) {
         for (PouchStackReference reference : getDeterministicPouchReferences(inventory)) {
             ItemStack pouchStack = getPouchStack(inventory, reference);
@@ -176,5 +232,110 @@ public final class PouchInventoryAccess {
             CuriosCompat.setStackInSlot(inventory.player, reference.slot(), stack);
         }
         inventory.setChanged();
+    }
+
+    private static List<TradePouchState> collectTradePouches(
+            Inventory inventory,
+            List<PouchStackReference> references,
+            int requiredEmeralds
+    ) {
+        List<TradePouchState> tradePouches = new ArrayList<>();
+        int availableEmeralds = 0;
+
+        for (int index = 0; index < references.size() && availableEmeralds < requiredEmeralds; index++) {
+            PouchStackReference reference = references.get(index);
+            ItemStack pouchStack = getPouchStack(inventory, reference);
+            if (!PouchData.isPouchStack(pouchStack)) {
+                continue;
+            }
+
+            int storedEmeralds = PouchData.getStoredEmeraldEquivalent(pouchStack);
+            if (storedEmeralds <= 0) {
+                continue;
+            }
+
+            tradePouches.add(new TradePouchState(index, reference, pouchStack, PouchData.loadContents(pouchStack)));
+            availableEmeralds += storedEmeralds;
+        }
+
+        if (availableEmeralds < requiredEmeralds) {
+            return List.of();
+        }
+
+        return tradePouches;
+    }
+
+    private static int removeLooseEmeralds(NonNullList<ItemStack> contents, int remaining) {
+        for (int slot = 0; slot < contents.size() && remaining > 0; slot++) {
+            ItemStack stack = contents.get(slot);
+            if (!stack.is(Items.EMERALD)) {
+                continue;
+            }
+
+            int taken = Math.min(remaining, stack.getCount());
+            stack.shrink(taken);
+            remaining -= taken;
+            if (stack.isEmpty()) {
+                contents.set(slot, ItemStack.EMPTY);
+            }
+        }
+
+        return remaining;
+    }
+
+    private static int removeEmeraldBlocks(NonNullList<ItemStack> contents, int remaining) {
+        for (int slot = 0; slot < contents.size() && remaining > 0; slot++) {
+            ItemStack stack = contents.get(slot);
+            if (!stack.is(Items.EMERALD_BLOCK)) {
+                continue;
+            }
+
+            int blocksNeeded = (remaining + 8) / 9;
+            int taken = Math.min(blocksNeeded, stack.getCount());
+            stack.shrink(taken);
+            remaining -= taken * 9;
+            if (stack.isEmpty()) {
+                contents.set(slot, ItemStack.EMPTY);
+            }
+        }
+
+        return remaining;
+    }
+
+    private static ItemStack insertIntoPouches(
+            Inventory inventory,
+            List<PouchStackReference> references,
+            ItemStack stack,
+            int startIndex
+    ) {
+        if (stack.isEmpty() || references.isEmpty()) {
+            return stack;
+        }
+
+        ItemStack remainder = stack.copy();
+        int normalizedStart = Math.floorMod(startIndex, references.size());
+        for (int offset = 0; offset < references.size() && !remainder.isEmpty(); offset++) {
+            PouchStackReference reference = references.get((normalizedStart + offset) % references.size());
+            ItemStack pouchStack = getPouchStack(inventory, reference);
+            if (!PouchData.isPouchStack(pouchStack)) {
+                continue;
+            }
+
+            int previousCount = remainder.getCount();
+            remainder = PouchData.insertIntoPouch(pouchStack, remainder, remainder.getCount());
+            if (remainder.getCount() != previousCount) {
+                commitPouchStack(inventory, reference, pouchStack);
+            }
+        }
+
+        return remainder;
+    }
+
+    private record TradePouchState(
+            int referenceIndex,
+            PouchStackReference reference,
+            ItemStack pouchStack,
+            NonNullList<ItemStack> contents
+    ) {
     }
 }
