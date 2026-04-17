@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch;
 
 import com.jvn.emeraldpouch.event.AutoPickupHandler;
+import com.jvn.emeraldpouch.event.MerchantTradeHandler;
 import com.jvn.emeraldpouch.event.PouchUseHandler;
 import com.jvn.emeraldpouch.network.ModNetwork;
 import com.jvn.emeraldpouch.registry.ModCreativeTabs;
@@ -34,6 +35,7 @@ public final class EmeraldPouchMod {
         modEventBus.addListener(this::addCreativeTabItems);
         modEventBus.addListener(ModNetwork::registerPayloadHandlers);
         NeoForge.EVENT_BUS.addListener(AutoPickupHandler::onItemEntityPickupPost);
+        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, PouchUseHandler::onRightClickItem);
         modContainer.registerConfig(ModConfig.Type.CLIENT, EmeraldPouchClientConfig.SPEC);
         if (FMLEnvironment.dist == Dist.CLIENT) {
