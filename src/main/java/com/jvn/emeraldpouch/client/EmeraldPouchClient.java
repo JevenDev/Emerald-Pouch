@@ -12,7 +12,9 @@ import com.jvn.emeraldpouch.screen.PouchScreen;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.network.chat.Component;
@@ -143,7 +145,8 @@ public final class EmeraldPouchClient {
     }
 
     public static void onScreenRenderPost(ScreenEvent.Render.Post event) {
-        if (!(event.getScreen() instanceof InventoryScreen inventoryScreen)) {
+        if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)
+                || !(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
             return;
         }
 
@@ -160,7 +163,7 @@ public final class EmeraldPouchClient {
 
         GuiGraphics guiGraphics = event.getGuiGraphics();
         String counterText = displayData.compactEmeraldAmount();
-        DisplayLayout layout = computeInventoryLayout(minecraft, inventoryScreen, counterText);
+        DisplayLayout layout = computeInventoryLayout(minecraft, containerScreen, counterText);
         boolean hoverIcon = isHovered(event.getMouseX(), event.getMouseY(), layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
         renderIconAndMaybeText(
                 guiGraphics,
@@ -184,7 +187,8 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        if (!(event.getScreen() instanceof InventoryScreen inventoryScreen)) {
+        if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)
+                || !(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
             return;
         }
 
@@ -199,7 +203,7 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        DisplayLayout layout = computeInventoryLayout(minecraft, inventoryScreen, displayData.compactEmeraldAmount());
+        DisplayLayout layout = computeInventoryLayout(minecraft, containerScreen, displayData.compactEmeraldAmount());
         if (!isHovered(event.getMouseX(), event.getMouseY(), layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE)) {
             return;
         }
@@ -379,7 +383,7 @@ public final class EmeraldPouchClient {
         };
     }
 
-    private static DisplayLayout computeInventoryLayout(Minecraft minecraft, InventoryScreen screen, String counterText) {
+    private static DisplayLayout computeInventoryLayout(Minecraft minecraft, AbstractContainerScreen<?> screen, String counterText) {
         int iconX = screen.getGuiLeft() + screen.getXSize() - INVENTORY_ICON_RIGHT_MARGIN - HUD_ICON_SIZE;
         int iconY = screen.getGuiTop() + INVENTORY_ICON_TOP_MARGIN;
         int textWidth = minecraft.font.width(counterText);
