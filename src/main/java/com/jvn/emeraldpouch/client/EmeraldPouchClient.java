@@ -4,14 +4,17 @@ import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
+import com.jvn.emeraldpouch.network.MerchantTradeClickPayload;
 import com.jvn.emeraldpouch.network.OpenFirstPouchPayload;
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import com.jvn.emeraldpouch.screen.PouchScreen;
+import java.lang.reflect.Field;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
@@ -86,7 +89,17 @@ public final class EmeraldPouchClient {
     private static final int INVENTORY_TEXT_Y_OFFSET = 2;
     private static final int BUNDLE_OVERLAY_TEXT_X_OFFSET = 4;
     private static final int BUNDLE_OVERLAY_TEXT_Y_OFFSET = 4;
+    private static final int MERCHANT_TRADE_BUTTON_X = 5;
+    private static final int MERCHANT_TRADE_BUTTON_Y = 18;
+    private static final int MERCHANT_TRADE_BUTTON_WIDTH = 88;
+    private static final int MERCHANT_TRADE_BUTTON_HEIGHT = 20;
+    private static final int MERCHANT_VISIBLE_TRADE_ROWS = 7;
+    private static final int MERCHANT_RESULT_SLOT_X = 220;
+    private static final int MERCHANT_RESULT_SLOT_Y = 37;
+    private static final int SLOT_SIZE = 16;
+    private static final Field MERCHANT_SCROLL_OFFSET_FIELD = findField(MerchantScreen.class, "scrollOff");
     private static boolean showPouchText = true;
+    private static boolean shiftClickedMerchantResult = false;
 
     private EmeraldPouchClient() {
     }
@@ -183,8 +196,21 @@ public final class EmeraldPouchClient {
     }
 
     public static void onScreenMouseButtonPressedPre(ScreenEvent.MouseButtonPressed.Pre event) {
+        shiftClickedMerchantResult = false;
+
         if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT) {
             return;
+        }
+
+        // Detect shift-click on the merchant result slot BEFORE vanilla empties it.
+        if (event.getScreen() instanceof MerchantScreen merchantScreen && Screen.hasShiftDown()) {
+            int rx = (int) event.getMouseX() - merchantScreen.getGuiLeft();
+            int ry = (int) event.getMouseY() - merchantScreen.getGuiTop();
+            if (rx >= MERCHANT_RESULT_SLOT_X && rx < MERCHANT_RESULT_SLOT_X + SLOT_SIZE
+                    && ry >= MERCHANT_RESULT_SLOT_Y && ry < MERCHANT_RESULT_SLOT_Y + SLOT_SIZE
+                    && merchantScreen.getMenu().getSlot(2).hasItem()) {
+                shiftClickedMerchantResult = true;
+            }
         }
 
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)
@@ -210,6 +236,41 @@ public final class EmeraldPouchClient {
 
         togglePouchTextVisibility(minecraft);
         event.setCanceled(true);
+    }
+
+    public static void onScreenMouseButtonPressedPost(ScreenEvent.MouseButtonPressed.Post event) {
+        if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT || !event.wasClickHandled()) {
+            return;
+        }
+
+        if (!(event.getScreen() instanceof MerchantScreen merchantScreen)) {
+            return;
+        }
+
+        if (shiftClickedMerchantResult) {
+            shiftClickedMerchantResult = false;
+            PacketDistributor.sendToServer(new MerchantTradeClickPayload(true));
+            return;
+        }
+
+        int relativeX = (int) event.getMouseX() - merchantScreen.getGuiLeft();
+        int relativeY = (int) event.getMouseY() - merchantScreen.getGuiTop();
+        if (relativeX < MERCHANT_TRADE_BUTTON_X || relativeX >= MERCHANT_TRADE_BUTTON_X + MERCHANT_TRADE_BUTTON_WIDTH) {
+            return;
+        }
+
+        int listHeight = MERCHANT_VISIBLE_TRADE_ROWS * MERCHANT_TRADE_BUTTON_HEIGHT;
+        if (relativeY < MERCHANT_TRADE_BUTTON_Y || relativeY >= MERCHANT_TRADE_BUTTON_Y + listHeight) {
+            return;
+        }
+
+        int row = (relativeY - MERCHANT_TRADE_BUTTON_Y) / MERCHANT_TRADE_BUTTON_HEIGHT;
+        int offerIndex = row + getMerchantScrollOffset(merchantScreen);
+        if (offerIndex < 0 || offerIndex >= merchantScreen.getMenu().getOffers().size()) {
+            return;
+        }
+
+        PacketDistributor.sendToServer(new MerchantTradeClickPayload(false));
     }
 
     public static void onMouseButtonInputPre(InputEvent.MouseButton.Pre event) {
@@ -466,6 +527,24 @@ public final class EmeraldPouchClient {
                 ),
                 Component.translatable("tooltip.emeraldpouch.inventory.pouch_count", displayData.pouchCount())
         );
+    }
+
+    private static int getMerchantScrollOffset(MerchantScreen screen) {
+        try {
+            return MERCHANT_SCROLL_OFFSET_FIELD.getInt(screen);
+        } catch (IllegalAccessException exception) {
+            throw new IllegalStateException("Unable to read merchant screen scroll offset", exception);
+        }
+    }
+
+    private static Field findField(Class<?> type, String fieldName) {
+        try {
+            Field field = type.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field;
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + fieldName, exception);
+        }
     }
 
     private record DisplayLayout(int iconX, int iconY, int textX, int textY, int textWidth) {
