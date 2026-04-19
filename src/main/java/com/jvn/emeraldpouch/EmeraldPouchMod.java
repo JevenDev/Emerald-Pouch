@@ -35,7 +35,9 @@ public final class EmeraldPouchMod {
         modEventBus.addListener(this::addCreativeTabItems);
         modEventBus.addListener(ModNetwork::registerPayloadHandlers);
         NeoForge.EVENT_BUS.addListener(AutoPickupHandler::onItemEntityPickupPost);
-        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onContainerOpened);
+        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onContainerClosed);
+        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onTradeWithVillager);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, PouchUseHandler::onRightClickItem);
         modContainer.registerConfig(ModConfig.Type.CLIENT, EmeraldPouchClientConfig.SPEC);
         if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -47,6 +49,7 @@ public final class EmeraldPouchMod {
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onRenderGuiLayerPost);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onScreenRenderPost);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onScreenMouseButtonPressedPre);
+            NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onScreenMouseButtonPressedPost);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onMouseButtonInputPre);
         }
     }

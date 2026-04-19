@@ -59,6 +59,14 @@ public final class PouchInventoryAccess {
         return remainder;
     }
 
+    public static ItemStack insertIntoPouches(Inventory inventory, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        return insertIntoPouches(inventory, getDeterministicPouchReferences(inventory), stack, 0);
+    }
+
     public static ItemStack extractMatching(Inventory inventory, ItemStack matcher, int maxCount) {
         if (maxCount <= 0 || matcher.isEmpty()) {
             return ItemStack.EMPTY;
