@@ -1,6 +1,6 @@
 package com.jvn.emeraldpouch.compat;
 
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 
 public final class ModCompat {
     private static final boolean SHULKER_TOOLTIP_LOADED =
@@ -24,6 +24,6 @@ public final class ModCompat {
     }
 
     public static boolean hasSlotCompatLoaded() {
-        return CURIOS_LOADED || ACCESSORIES_LOADED;
+        return false;
     }
 }

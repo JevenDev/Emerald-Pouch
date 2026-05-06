@@ -1,5 +1,6 @@
 package com.jvn.emeraldpouch.pouch;
 
+import com.jvn.emeraldpouch.util.StackHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -82,7 +83,7 @@ public class PouchItemContainer implements Container {
         }
 
         items.set(slot, stack);
-        stack.limitSize(getMaxStackSize(stack));
+        stack.setCount(Math.min(stack.getCount(), getMaxStackSize()));
         setChanged();
     }
 
@@ -136,7 +137,7 @@ public class PouchItemContainer implements Container {
 
         for (int slot = 0; slot < slotCount && remaining > 0; slot++) {
             ItemStack current = items.get(slot);
-            if (current.isEmpty() || !ItemStack.isSameItemSameComponents(current, stack)) {
+            if (current.isEmpty() || !StackHelper.sameItemData(current, stack)) {
                 continue;
             }
 
@@ -155,7 +156,7 @@ public class PouchItemContainer implements Container {
             }
 
             int move = Math.min(remaining, stack.getMaxStackSize());
-            items.set(slot, stack.copyWithCount(move));
+            items.set(slot, StackHelper.copyWithCount(stack, move));
             remaining -= move;
         }
 

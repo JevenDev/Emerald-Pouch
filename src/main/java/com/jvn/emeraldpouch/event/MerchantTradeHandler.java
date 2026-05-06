@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch.event;
 
 import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
+import com.jvn.emeraldpouch.util.StackHelper;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +14,8 @@ import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
-import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
-import net.neoforged.neoforge.event.entity.player.TradeWithVillagerEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.event.entity.player.TradeWithVillagerEvent;
 
 public final class MerchantTradeHandler {
     private static final Field TRADE_CONTAINER_FIELD = findField(MerchantMenu.class, "tradeContainer");
@@ -48,7 +49,7 @@ public final class MerchantTradeHandler {
             return;
         }
 
-        depositRemainingEmeralds(serverPlayer.getInventory(), session.pouchEmeraldBalance());
+        depositRemainingEmeralds(serverPlayer, session.pouchEmeraldBalance());
     }
 
     public static void onTradeWithVillager(TradeWithVillagerEvent event) {
@@ -122,7 +123,6 @@ public final class MerchantTradeHandler {
         );
         session.setShiftResultRefillPending(true);
 
-        // Best-effort immediate refill in case this packet arrives after the trade click packet.
         refillCurrentSelection(player, merchantMenu);
     }
 
@@ -137,11 +137,12 @@ public final class MerchantTradeHandler {
         merchantMenu.broadcastChanges();
     }
 
-    private static void depositRemainingEmeralds(Inventory inventory, int pouchEmeraldBalance) {
+    private static void depositRemainingEmeralds(ServerPlayer player, int pouchEmeraldBalance) {
         if (pouchEmeraldBalance <= 0) {
             return;
         }
 
+        Inventory inventory = player.getInventory();
         ItemStack extracted = PouchInventoryAccess.extractMatching(inventory, new ItemStack(Items.EMERALD), pouchEmeraldBalance);
         if (extracted.isEmpty()) {
             return;
@@ -151,6 +152,10 @@ public final class MerchantTradeHandler {
         if (!remainder.isEmpty()) {
             inventory.placeItemBackInInventory(remainder);
         }
+
+        // This runs during merchant menu teardown, after vanilla returns payment slots to the
+        // player inventory. Force a fresh inventory sync so the client does not keep a ghost stack.
+        player.inventoryMenu.broadcastFullState();
     }
 
     private static int emeraldCost(ItemStack stack) {
@@ -167,7 +172,7 @@ public final class MerchantTradeHandler {
         }
 
         ItemStack current = tradeContainer.getItem(slotIndex);
-        if (!current.isEmpty() && !ItemStack.isSameItemSameComponents(current, cost)) {
+        if (!current.isEmpty() && !StackHelper.sameItemData(current, cost)) {
             return 0;
         }
 
@@ -181,7 +186,7 @@ public final class MerchantTradeHandler {
             return 0;
         }
 
-        ItemStack updated = current.isEmpty() ? cost.copyWithCount(extracted.getCount()) : current.copy();
+        ItemStack updated = current.isEmpty() ? StackHelper.copyWithCount(cost, extracted.getCount()) : current.copy();
         if (!current.isEmpty()) {
             updated.grow(extracted.getCount());
         }

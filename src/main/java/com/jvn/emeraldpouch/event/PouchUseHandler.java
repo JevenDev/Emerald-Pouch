@@ -8,7 +8,7 @@ import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 public final class PouchUseHandler {
     private PouchUseHandler() {

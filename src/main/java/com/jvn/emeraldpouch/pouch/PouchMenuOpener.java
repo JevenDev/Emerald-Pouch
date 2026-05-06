@@ -7,6 +7,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkHooks;
 
 public final class PouchMenuOpener {
     private PouchMenuOpener() {
@@ -33,7 +34,8 @@ public final class PouchMenuOpener {
         PouchInventoryAccess.commitPouchStack(inventory, reference, pouchStack);
 
         int slotCount = PouchData.getSlotCount(pouchStack);
-        OptionalInt menuId = player.openMenu(
+        NetworkHooks.openScreen(
+                player,
                 new SimpleMenuProvider(
                         (containerId, playerInventory, menuPlayer) -> new PouchMenu(
                                 containerId,
@@ -51,11 +53,6 @@ public final class PouchMenuOpener {
                 }
         );
 
-        if (menuId.isEmpty()) {
-            PouchData.setOpenedVisualEnabled(pouchStack, false);
-            PouchInventoryAccess.commitPouchStack(inventory, reference, pouchStack);
-        }
-
-        return menuId.isPresent();
+        return true;
     }
 }

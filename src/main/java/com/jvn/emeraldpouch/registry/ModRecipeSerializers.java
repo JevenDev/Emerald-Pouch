@@ -2,18 +2,18 @@ package com.jvn.emeraldpouch.registry;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.recipe.PouchColoringRecipe;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 public final class ModRecipeSerializers {
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS =
-            DeferredRegister.create(Registries.RECIPE_SERIALIZER, EmeraldPouchMod.MOD_ID);
+            DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, EmeraldPouchMod.MOD_ID);
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<PouchColoringRecipe>> POUCH_COLORING =
+    public static final RegistryObject<RecipeSerializer<PouchColoringRecipe>> POUCH_COLORING =
             RECIPE_SERIALIZERS.register(
                     "crafting_special_pouch_coloring",
                     () -> new SimpleCraftingRecipeSerializer<>(PouchColoringRecipe::new)

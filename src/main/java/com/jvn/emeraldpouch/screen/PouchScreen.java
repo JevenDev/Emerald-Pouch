@@ -14,23 +14,23 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
-    private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
     private static final int BUTTON_SIZE = 12;
     private static final int BUTTON_GAP = 1;
     private static final int BUTTON_RIGHT_MARGIN = 7;
     private static final int BUTTON_TOP_MARGIN = 4;
     private static final ResourceLocation COMPACT_DEFAULT =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/sprites/pouch/compact_button.png");
     private static final ResourceLocation COMPACT_SELECTED =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button_selected");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/sprites/pouch/compact_button_selected.png");
     private static final ResourceLocation COMPACT_HOVER =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button_hover");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/sprites/pouch/compact_button_hover.png");
     private static final ResourceLocation PICKUP_DEFAULT =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/sprites/pouch/pickup_button.png");
     private static final ResourceLocation PICKUP_SELECTED =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button_selected");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/sprites/pouch/pickup_button_selected.png");
     private static final ResourceLocation PICKUP_HOVER =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button_hover");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/sprites/pouch/pickup_button_hover.png");
     private static final Component COMPACT_NAME = Component.translatable("screen.emeraldpouch.auto_compact.name");
     private static final Component PICKUP_NAME = Component.translatable("screen.emeraldpouch.auto_pickup.name");
 
@@ -90,7 +90,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        this.renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
     }

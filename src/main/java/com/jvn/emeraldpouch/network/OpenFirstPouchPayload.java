@@ -1,19 +1,31 @@
 package com.jvn.emeraldpouch.network;
 
-import com.jvn.emeraldpouch.EmeraldPouchMod;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
+import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
+import java.util.function.Supplier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
-public record OpenFirstPouchPayload() implements CustomPacketPayload {
-    public static final Type<OpenFirstPouchPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "open_first_pouch"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, OpenFirstPouchPayload> STREAM_CODEC =
-            StreamCodec.unit(new OpenFirstPouchPayload());
+public record OpenFirstPouchPayload() {
+    public static void encode(OpenFirstPouchPayload payload, FriendlyByteBuf buffer) {
+    }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public static OpenFirstPouchPayload decode(FriendlyByteBuf buffer) {
+        return new OpenFirstPouchPayload();
+    }
+
+    public static void handle(OpenFirstPouchPayload payload, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            ServerPlayer serverPlayer = context.getSender();
+            if (serverPlayer == null) {
+                return;
+            }
+
+            PouchInventoryAccess.findFirstPouch(serverPlayer.getInventory())
+                    .ifPresent(reference -> PouchMenuOpener.openFromReference(serverPlayer, reference));
+        });
+        context.setPacketHandled(true);
     }
 }
