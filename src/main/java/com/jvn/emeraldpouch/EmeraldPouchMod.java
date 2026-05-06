@@ -1,5 +1,6 @@
 package com.jvn.emeraldpouch;
 
+import com.jvn.emeraldpouch.compat.ShulkerBoxTooltipCompat;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import com.jvn.emeraldpouch.event.AutoPickupHandler;
 import com.jvn.emeraldpouch.event.MerchantTradeHandler;
@@ -33,6 +34,7 @@ public final class EmeraldPouchMod {
         ModCreativeTabs.register(modEventBus);
         ModRecipeSerializers.register(modEventBus);
         ModNetwork.register();
+        ShulkerBoxTooltipCompat.registerPluginExtension();
 
         modEventBus.addListener(this::addCreativeTabItems);
         MinecraftForge.EVENT_BUS.addListener(AutoPickupHandler::onItemEntityPickup);

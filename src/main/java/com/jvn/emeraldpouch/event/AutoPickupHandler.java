@@ -5,6 +5,8 @@ import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 
 public final class AutoPickupHandler {
@@ -32,6 +34,17 @@ public final class AutoPickupHandler {
         if (inserted <= 0) {
             return;
         }
+
+        event.getEntity().level().playSound(
+                null,
+                event.getEntity().getX(),
+                event.getEntity().getY(),
+                event.getEntity().getZ(),
+                SoundEvents.ITEM_PICKUP,
+                SoundSource.PLAYERS,
+                0.2F,
+                ((event.getEntity().getRandom().nextFloat() - event.getEntity().getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
+        );
 
         if (remainder.isEmpty()) {
             itemEntity.discard();
