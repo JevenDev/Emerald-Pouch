@@ -1,19 +1,19 @@
 package com.jvn.emeraldpouch.pouch;
 
 import com.jvn.emeraldpouch.item.PouchItem;
+import com.jvn.emeraldpouch.util.StackHelper;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.ItemContainerContents;
 
 public final class PouchData {
     public static final String POUCH_TAG = "EmeraldPouch";
+    public static final String CONTENTS_TAG = "Contents";
     public static final String AUTO_COMPACT_TAG = "AutoCompact";
     public static final String AUTO_PICKUP_TAG = "AutoPickup";
     public static final String OPENED_VISUAL_TAG = "OpenedVisual";
@@ -42,32 +42,34 @@ public final class PouchData {
 
     public static NonNullList<ItemStack> loadContents(ItemStack pouchStack, int slotCount) {
         NonNullList<ItemStack> items = NonNullList.withSize(slotCount, ItemStack.EMPTY);
-        ItemContainerContents contents = pouchStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-        int upperBound = Math.min(slotCount, contents.getSlots());
-
-        for (int slot = 0; slot < upperBound; slot++) {
-            items.set(slot, contents.getStackInSlot(slot));
+        CompoundTag pouchTag = pouchStack.getTagElement(POUCH_TAG);
+        if (pouchTag != null && pouchTag.contains(CONTENTS_TAG, Tag.TAG_COMPOUND)) {
+            ContainerHelper.loadAllItems(pouchTag.getCompound(CONTENTS_TAG), items);
         }
-
         return items;
     }
 
     public static void saveContents(ItemStack pouchStack, List<ItemStack> items) {
-        List<ItemStack> copies = new ArrayList<>(items.size());
+        NonNullList<ItemStack> copies = NonNullList.withSize(items.size(), ItemStack.EMPTY);
         boolean hasAny = false;
 
-        for (ItemStack item : items) {
-            ItemStack copy = item.copy();
-            copies.add(copy);
+        for (int i = 0; i < items.size(); i++) {
+            ItemStack copy = items.get(i).copy();
+            copies.set(i, copy);
             hasAny |= !copy.isEmpty();
         }
 
+        CompoundTag pouchTag = getOrCreatePouchTag(pouchStack);
         if (!hasAny) {
-            pouchStack.remove(DataComponents.CONTAINER);
+            pouchTag.remove(CONTENTS_TAG);
+            writePouchTag(pouchStack, pouchTag);
             return;
         }
 
-        pouchStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(copies));
+        CompoundTag contentsTag = new CompoundTag();
+        ContainerHelper.saveAllItems(contentsTag, copies);
+        pouchTag.put(CONTENTS_TAG, contentsTag);
+        writePouchTag(pouchStack, pouchTag);
     }
 
     public static boolean isAutoCompactEnabled(ItemStack pouchStack) {
@@ -118,7 +120,7 @@ public final class PouchData {
 
         for (int slot = 0; slot < slotCount && remaining > 0; slot++) {
             ItemStack current = contents.get(slot);
-            if (current.isEmpty() || !ItemStack.isSameItemSameComponents(current, incoming)) {
+            if (current.isEmpty() || !StackHelper.sameItemData(current, incoming)) {
                 continue;
             }
 
@@ -138,7 +140,7 @@ public final class PouchData {
             }
 
             int move = Math.min(remaining, incoming.getMaxStackSize());
-            contents.set(slot, incoming.copyWithCount(move));
+            contents.set(slot, StackHelper.copyWithCount(incoming, move));
             remaining -= move;
         }
 
@@ -249,13 +251,8 @@ public final class PouchData {
             return false;
         }
 
-        ItemContainerContents contents = pouchStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-        if (contents.getSlots() < slotCount) {
-            return false;
-        }
-
-        for (int slot = 0; slot < slotCount; slot++) {
-            if (contents.getStackInSlot(slot).isEmpty()) {
+        for (ItemStack stack : loadContents(pouchStack, slotCount)) {
+            if (stack.isEmpty()) {
                 return false;
             }
         }
@@ -263,13 +260,8 @@ public final class PouchData {
     }
 
     private static boolean readToggle(ItemStack pouchStack, String key) {
-        CustomData customData = pouchStack.get(DataComponents.CUSTOM_DATA);
-        if (customData == null) {
-            return false;
-        }
-
-        CompoundTag root = customData.copyTag();
-        if (!root.contains(POUCH_TAG, Tag.TAG_COMPOUND)) {
+        CompoundTag root = pouchStack.getTag();
+        if (root == null || !root.contains(POUCH_TAG, Tag.TAG_COMPOUND)) {
             return false;
         }
 
@@ -277,20 +269,32 @@ public final class PouchData {
     }
 
     private static void writeToggle(ItemStack pouchStack, String key, boolean enabled) {
-        CustomData.update(DataComponents.CUSTOM_DATA, pouchStack, customData -> {
-            CompoundTag pouchTag = customData.contains(POUCH_TAG, Tag.TAG_COMPOUND) ? customData.getCompound(POUCH_TAG) : new CompoundTag();
+        CompoundTag pouchTag = getOrCreatePouchTag(pouchStack);
+        if (enabled) {
+            pouchTag.putBoolean(key, true);
+        } else {
+            pouchTag.remove(key);
+        }
+        writePouchTag(pouchStack, pouchTag);
+    }
 
-            if (enabled) {
-                pouchTag.putBoolean(key, true);
-            } else {
-                pouchTag.remove(key);
-            }
+    private static CompoundTag getOrCreatePouchTag(ItemStack pouchStack) {
+        CompoundTag root = pouchStack.getTag();
+        if (root != null && root.contains(POUCH_TAG, Tag.TAG_COMPOUND)) {
+            return root.getCompound(POUCH_TAG).copy();
+        }
+        return new CompoundTag();
+    }
 
-            if (pouchTag.isEmpty()) {
-                customData.remove(POUCH_TAG);
-            } else {
-                customData.put(POUCH_TAG, pouchTag);
+    private static void writePouchTag(ItemStack pouchStack, CompoundTag pouchTag) {
+        CompoundTag root = pouchStack.getOrCreateTag();
+        if (pouchTag.isEmpty()) {
+            root.remove(POUCH_TAG);
+            if (root.isEmpty()) {
+                pouchStack.setTag(null);
             }
-        });
+        } else {
+            root.put(POUCH_TAG, pouchTag);
+        }
     }
 }

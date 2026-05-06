@@ -1,22 +1,34 @@
 package com.jvn.emeraldpouch.network;
 
-import com.jvn.emeraldpouch.EmeraldPouchMod;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import com.jvn.emeraldpouch.event.MerchantTradeHandler;
+import java.util.function.Supplier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
-public record MerchantTradeClickPayload(boolean shiftResultClick) implements CustomPacketPayload {
-    public static final Type<MerchantTradeClickPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "merchant_trade_click"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, MerchantTradeClickPayload> STREAM_CODEC =
-            StreamCodec.of(
-                    (buffer, payload) -> buffer.writeBoolean(payload.shiftResultClick()),
-                    buffer -> new MerchantTradeClickPayload(buffer.readBoolean())
-            );
+public record MerchantTradeClickPayload(boolean shiftResultClick) {
+    public static void encode(MerchantTradeClickPayload payload, FriendlyByteBuf buffer) {
+        buffer.writeBoolean(payload.shiftResultClick());
+    }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public static MerchantTradeClickPayload decode(FriendlyByteBuf buffer) {
+        return new MerchantTradeClickPayload(buffer.readBoolean());
+    }
+
+    public static void handle(MerchantTradeClickPayload payload, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            ServerPlayer serverPlayer = context.getSender();
+            if (serverPlayer == null) {
+                return;
+            }
+
+            if (payload.shiftResultClick()) {
+                MerchantTradeHandler.onShiftTradeResultClick(serverPlayer);
+            } else {
+                MerchantTradeHandler.onTradeSelectionClick(serverPlayer);
+            }
+        });
+        context.setPacketHandled(true);
     }
 }

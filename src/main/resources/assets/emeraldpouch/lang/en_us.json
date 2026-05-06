@@ -46,6 +46,8 @@
   "tooltip.emeraldpouch.stored_emeralds": "Stored emeralds: %s",
   "tooltip.emeraldpouch.auto_compact": "Auto-compact: %s",
   "tooltip.emeraldpouch.auto_pickup": "Auto-pickup: %s",
+  "tooltip.emeraldpouch.item_count": "%s x%s",
+  "tooltip.emeraldpouch.more_items": "+%s more",
   "tooltip.emeraldpouch.more_info": "Left-Shift for more info",
   "tooltip.emeraldpouch.inventory.emeralds": "Emeralds: %s",
   "tooltip.emeraldpouch.inventory.blocks_equivalent": "Blocks equivalent: %s blocks + %s emeralds",

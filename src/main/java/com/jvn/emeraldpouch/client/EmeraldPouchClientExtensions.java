@@ -1,14 +1,16 @@
 package com.jvn.emeraldpouch.client;
 
-import net.neoforged.fml.ModContainer;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.fml.ModLoadingContext;
 
 public final class EmeraldPouchClientExtensions {
     private EmeraldPouchClientExtensions() {
     }
 
-    public static void registerConfigScreen(ModContainer modContainer) {
-        modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+    public static void registerConfigScreen() {
+        ModLoadingContext.get().registerExtensionPoint(
+                ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> new EmeraldPouchConfigScreen(parent))
+        );
     }
 }

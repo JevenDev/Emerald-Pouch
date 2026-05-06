@@ -2,6 +2,7 @@ package com.jvn.emeraldpouch.pouch;
 
 import com.jvn.emeraldpouch.compat.AccessoriesCompat;
 import com.jvn.emeraldpouch.compat.CuriosCompat;
+import com.jvn.emeraldpouch.util.StackHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public final class PouchInventoryAccess {
             }
 
             ItemStack stack = inventory.getItem(slot);
-            if (!ItemStack.isSameItemSameComponents(stack, matcher)) {
+            if (!StackHelper.sameItemData(stack, matcher)) {
                 continue;
             }
 
@@ -93,7 +94,7 @@ public final class PouchInventoryAccess {
 
         if (extracted < maxCount) {
             ItemStack offhand = inventory.getItem(Inventory.SLOT_OFFHAND);
-            if (ItemStack.isSameItemSameComponents(offhand, matcher)) {
+            if (StackHelper.sameItemData(offhand, matcher)) {
                 int take = Math.min(maxCount - extracted, offhand.getCount());
                 offhand.shrink(take);
                 if (offhand.isEmpty()) {
@@ -108,7 +109,7 @@ public final class PouchInventoryAccess {
         }
 
         inventory.setChanged();
-        return matcher.copyWithCount(extracted);
+        return StackHelper.copyWithCount(matcher, extracted);
     }
 
     public static ItemStack extractEmeraldsForTrade(Inventory inventory, int maxCount) {
@@ -130,7 +131,7 @@ public final class PouchInventoryAccess {
             }
         }
 
-        int overflowStartIndex = tradePouches.getLast().referenceIndex();
+        int overflowStartIndex = tradePouches.get(tradePouches.size() - 1).referenceIndex();
         if (remaining > 0) {
             for (TradePouchState tradePouch : tradePouches) {
                 int previousRemaining = remaining;
@@ -180,7 +181,6 @@ public final class PouchInventoryAccess {
         int curiosSlots = CuriosCompat.getSlotCount(inventory.player);
         List<PouchStackReference> references = new ArrayList<>(accessoriesBeltSlots + curiosSlots + Inventory.INVENTORY_SIZE + 1);
 
-        // Prioritize equipped slot pouches over inventory pouches.
         for (int slot = 0; slot < accessoriesBeltSlots; slot++) {
             if (PouchData.isPouchStack(AccessoriesCompat.getBeltStackInSlot(inventory.player, slot))) {
                 references.add(PouchStackReference.accessoriesBelt(slot));

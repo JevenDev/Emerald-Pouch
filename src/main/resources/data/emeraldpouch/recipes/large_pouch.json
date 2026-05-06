@@ -5,20 +5,17 @@
     "L": {
       "item": "minecraft:leather"
     },
-    "S": {
-      "item": "minecraft:string"
-    },
-    "E": {
-      "item": "minecraft:emerald"
+    "P": {
+      "item": "emeraldpouch:pouch"
     }
   },
   "pattern": [
-    " S ",
-    "LEL",
+    "LLL",
+    "LPL",
     "LLL"
   ],
   "result": {
     "count": 1,
-    "id": "emeraldpouch:pouch"
+    "item": "emeraldpouch:large_pouch"
   }
 }

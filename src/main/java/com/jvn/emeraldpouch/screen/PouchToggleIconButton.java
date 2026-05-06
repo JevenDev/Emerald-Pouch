@@ -35,6 +35,6 @@ public class PouchToggleIconButton extends Button {
         ResourceLocation sprite = this.isHovered
                 ? this.hoverSprite
                 : (this.selectedState.getAsBoolean() ? this.selectedSprite : this.defaultSprite);
-        guiGraphics.blitSprite(sprite, this.getX(), this.getY(), this.width, this.height);
+        guiGraphics.blit(sprite, this.getX(), this.getY(), 0.0F, 0.0F, this.width, this.height, this.width, this.height);
     }
 }

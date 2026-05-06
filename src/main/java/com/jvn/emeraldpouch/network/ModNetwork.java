@@ -1,52 +1,38 @@
 package com.jvn.emeraldpouch.network;
 
-import com.jvn.emeraldpouch.event.MerchantTradeHandler;
-import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
-import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
-import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.jvn.emeraldpouch.EmeraldPouchMod;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
+    private static final String PROTOCOL_VERSION = "1";
+    private static int nextMessageId = 0;
+
+    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "main"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals
+    );
+
     private ModNetwork() {
     }
 
-    public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
-        var registrar = event.registrar("1");
-        registrar.playToServer(
-                OpenFirstPouchPayload.TYPE,
-                OpenFirstPouchPayload.STREAM_CODEC,
-                ModNetwork::handleOpenFirstPouch
+    public static void register() {
+        CHANNEL.registerMessage(
+                nextMessageId++,
+                OpenFirstPouchPayload.class,
+                OpenFirstPouchPayload::encode,
+                OpenFirstPouchPayload::decode,
+                OpenFirstPouchPayload::handle
         );
-        registrar.playToServer(
-                MerchantTradeClickPayload.TYPE,
-                MerchantTradeClickPayload.STREAM_CODEC,
-                ModNetwork::handleMerchantTradeClick
+        CHANNEL.registerMessage(
+                nextMessageId++,
+                MerchantTradeClickPayload.class,
+                MerchantTradeClickPayload::encode,
+                MerchantTradeClickPayload::decode,
+                MerchantTradeClickPayload::handle
         );
-    }
-
-    private static void handleOpenFirstPouch(OpenFirstPouchPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer serverPlayer)) {
-                return;
-            }
-
-            PouchInventoryAccess.findFirstPouch(serverPlayer.getInventory())
-                    .ifPresent(reference -> PouchMenuOpener.openFromReference(serverPlayer, reference));
-        });
-    }
-
-    private static void handleMerchantTradeClick(MerchantTradeClickPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer serverPlayer)) {
-                return;
-            }
-
-            if (payload.shiftResultClick()) {
-                MerchantTradeHandler.onShiftTradeResultClick(serverPlayer);
-            } else {
-                MerchantTradeHandler.onTradeSelectionClick(serverPlayer);
-            }
-        });
     }
 }

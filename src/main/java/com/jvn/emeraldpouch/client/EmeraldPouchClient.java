@@ -1,77 +1,78 @@
 package com.jvn.emeraldpouch.client;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
-import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import com.jvn.emeraldpouch.network.MerchantTradeClickPayload;
+import com.jvn.emeraldpouch.network.ModNetwork;
 import com.jvn.emeraldpouch.network.OpenFirstPouchPayload;
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import com.jvn.emeraldpouch.screen.PouchScreen;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public final class EmeraldPouchClient {
     private static final ResourceLocation EMERALD_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch.png");
     private static final ResourceLocation BLACK_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/black_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/black_emerald_pouch.png");
     private static final ResourceLocation BLUE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/blue_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/blue_emerald_pouch.png");
     private static final ResourceLocation BROWN_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/brown_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/brown_emerald_pouch.png");
     private static final ResourceLocation CYAN_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/cyan_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/cyan_emerald_pouch.png");
     private static final ResourceLocation GRAY_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/gray_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/gray_emerald_pouch.png");
     private static final ResourceLocation GREEN_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/green_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/green_emerald_pouch.png");
     private static final ResourceLocation LIGHT_BLUE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_blue_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_blue_emerald_pouch.png");
     private static final ResourceLocation LIGHT_GRAY_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_gray_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_gray_emerald_pouch.png");
     private static final ResourceLocation LIME_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/lime_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/lime_emerald_pouch.png");
     private static final ResourceLocation MAGENTA_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/magenta_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/magenta_emerald_pouch.png");
     private static final ResourceLocation ORANGE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/orange_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/orange_emerald_pouch.png");
     private static final ResourceLocation PINK_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/pink_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/pink_emerald_pouch.png");
     private static final ResourceLocation PURPLE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/purple_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/purple_emerald_pouch.png");
     private static final ResourceLocation RED_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/red_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/red_emerald_pouch.png");
     private static final ResourceLocation WHITE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/white_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/white_emerald_pouch.png");
     private static final ResourceLocation YELLOW_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/yellow_emerald_pouch.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/yellow_emerald_pouch.png");
     private static final ResourceLocation POUCH_HUD_HOVER_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch_hover.png");
+            new ResourceLocation(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch_hover.png");
     private static final int HUD_ICON_SIZE = 16;
     private static final int XP_TEXT_COLOR = 8453920;
     private static final int WHITE_TEXT_COLOR = 16777215;
@@ -104,36 +105,37 @@ public final class EmeraldPouchClient {
     private EmeraldPouchClient() {
     }
 
-    public static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(ModMenus.POUCH_MENU.get(), PouchScreen::new);
-    }
-
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(ModKeyMappings.OPEN_FIRST_POUCH);
     }
 
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ResourceLocation openedPropertyId = ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened");
+            MenuScreens.register(ModMenus.POUCH_MENU.get(), PouchScreen::new);
+            ResourceLocation openedPropertyId = new ResourceLocation(EmeraldPouchMod.MOD_ID, "opened");
             for (var item : ModItems.allPouchItems()) {
                 ItemProperties.register(item.get(), openedPropertyId, EmeraldPouchClient::openedProperty);
             }
         });
     }
 
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null || minecraft.screen != null) {
             return;
         }
 
         while (ModKeyMappings.OPEN_FIRST_POUCH.consumeClick()) {
-            PacketDistributor.sendToServer(new OpenFirstPouchPayload());
+            ModNetwork.CHANNEL.sendToServer(new OpenFirstPouchPayload());
         }
     }
 
-    public static void onRenderGuiLayerPost(RenderGuiLayerEvent.Post event) {
-        if (!VanillaGuiLayers.EXPERIENCE_LEVEL.equals(event.getName())) {
+    public static void onRenderGuiLayerPost(RenderGuiOverlayEvent.Post event) {
+        if (!event.getOverlay().id().equals(VanillaGuiOverlay.HOTBAR.type().id())) {
             return;
         }
 
@@ -191,7 +193,7 @@ public final class EmeraldPouchClient {
         boolean hoverText = showPouchText
                 && isHovered(event.getMouseX(), event.getMouseY(), layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
         if (hoverIcon || hoverText) {
-            guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), java.util.Optional.empty(), event.getMouseX(), event.getMouseY());
+            guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), Optional.empty(), event.getMouseX(), event.getMouseY());
         }
     }
 
@@ -202,7 +204,6 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        // Detect shift-click on the merchant result slot BEFORE vanilla empties it.
         if (event.getScreen() instanceof MerchantScreen merchantScreen && Screen.hasShiftDown()) {
             int rx = (int) event.getMouseX() - merchantScreen.getGuiLeft();
             int ry = (int) event.getMouseY() - merchantScreen.getGuiTop();
@@ -239,7 +240,7 @@ public final class EmeraldPouchClient {
     }
 
     public static void onScreenMouseButtonPressedPost(ScreenEvent.MouseButtonPressed.Post event) {
-        if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT || !event.wasClickHandled()) {
+        if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT || !event.wasHandled()) {
             return;
         }
 
@@ -249,7 +250,7 @@ public final class EmeraldPouchClient {
 
         if (shiftClickedMerchantResult) {
             shiftClickedMerchantResult = false;
-            PacketDistributor.sendToServer(new MerchantTradeClickPayload(true));
+            ModNetwork.CHANNEL.sendToServer(new MerchantTradeClickPayload(true));
             return;
         }
 
@@ -270,7 +271,7 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        PacketDistributor.sendToServer(new MerchantTradeClickPayload(false));
+        ModNetwork.CHANNEL.sendToServer(new MerchantTradeClickPayload(false));
     }
 
     public static void onMouseButtonInputPre(InputEvent.MouseButton.Pre event) {
@@ -402,8 +403,6 @@ public final class EmeraldPouchClient {
     private static void drawHoverOverlay(GuiGraphics guiGraphics, int iconX, int iconY) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-
-        // Brighten only where the hover mask has alpha.
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
         guiGraphics.blit(
                 POUCH_HUD_HOVER_TEXTURE,
@@ -416,7 +415,6 @@ public final class EmeraldPouchClient {
                 HUD_ICON_SIZE,
                 HUD_ICON_SIZE
         );
-
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
@@ -484,7 +482,7 @@ public final class EmeraldPouchClient {
 
         int iconY = switch (hudPosition) {
             case POSITION_1 -> guiHeight - POSITION_1_Y_FROM_BOTTOM;
-            case POSITION_2 -> guiHeight - minecraft.gui.rightHeight + 10 + POSITION_2_Y_OFFSET;
+            case POSITION_2 -> guiHeight - 49 + POSITION_2_Y_OFFSET;
             case POSITION_3 -> guiHeight - POSITION_3_Y_FROM_BOTTOM;
         };
 

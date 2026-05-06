@@ -1,11 +1,12 @@
 package com.jvn.emeraldpouch.menu;
 
 import com.jvn.emeraldpouch.pouch.PouchData;
-import com.jvn.emeraldpouch.pouch.PouchItemContainer;
 import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
+import com.jvn.emeraldpouch.pouch.PouchItemContainer;
 import com.jvn.emeraldpouch.pouch.PouchStackReference;
 import com.jvn.emeraldpouch.registry.ModMenus;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.jvn.emeraldpouch.util.StackHelper;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -29,7 +30,7 @@ public class PouchMenu extends AbstractContainerMenu {
     private final int storageRows;
     private final ContainerData toggleData;
 
-    public PouchMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf extraData) {
+    public PouchMenu(int containerId, Inventory playerInventory, FriendlyByteBuf extraData) {
         this(
                 containerId,
                 playerInventory,
@@ -90,7 +91,7 @@ public class PouchMenu extends AbstractContainerMenu {
         ItemStack currentStack = getCurrentPouchStack();
         ItemStack backingStack = this.pouchContainer.getPouchStack();
         return !currentStack.isEmpty()
-                && ItemStack.isSameItemSameComponents(currentStack, backingStack)
+                && StackHelper.sameItemData(currentStack, backingStack)
                 && PouchData.getSlotCount(currentStack) == this.storageSlotCount;
     }
 
