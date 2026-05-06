@@ -1,3 +1,14 @@
+<div align="center">
+  
+<a href="https://modrinth.com/mod/emerald-pouch/settings/versions?l=neoforge"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/supported/neoforge_64h.png" alt="Available for NeoForge"></a>
+<a href="https://modrinth.com/mod/emerald-pouch/settings/versions?l=forge"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/supported/forge_64h.png" alt="Available for Forge"></a>
+<br>
+<a href="https://modrinth.com/mod/emerald-pouch" target="_blank" rel="noopener noreferrer"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/compact-minimal/available/modrinth_46h.png" alt="Available on Modrinth"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/emerald-pouch" target="_blank" rel="noopener noreferrer"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/compact-minimal/available/curseforge_46h.png" alt="Available on CurseForge"></a>
+<a href="https://github.com/JevenDev/Emerald-Pouch" target="_blank" rel="noopener noreferrer"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/compact-minimal/available/github_46h.png" alt="Available on GitHub"></a>
+  
+</div>
+
 ![All large bundle colours in a banner](https://cdn.modrinth.com/data/cached_images/40f7e6fc57f02cf9bed765f5b98cb66385128109.png)
 
 ![Banner image, says "Emerald Pouch"](https://cdn.modrinth.com/data/cached_images/2dc4c89f856b52119a5b50dc1c943890d355f1e3.png)
@@ -74,6 +85,7 @@ When choosing where emeralds are pulled from, Emerald Pouch prioritizes **equipp
     width="49%"
   />
 </div>
+<br>
 
 ![keybinds](https://cdn.modrinth.com/data/cached_images/201d5ce49ba16974e3c3b0b562c392e03f38e35f.png)
 
@@ -82,15 +94,15 @@ When choosing where emeralds are pulled from, Emerald Pouch prioritizes **equipp
 ## Default keybinds
 
 - **Open Emerald Pouch** - `N`
-    - Opens the **first pouch found** in your inventory
-    - If [Accessories](https://modrinth.com/mod/accessories) or [Curios](https://modrinth.com/mod/curios) is installed, it will prioritize an equipped belt-slot pouch first
+  - Opens the **first pouch found** in your inventory
+  - If [Accessories](https://modrinth.com/mod/accessories) or [Curios](https://modrinth.com/mod/curios) is installed, it will prioritize an equipped belt-slot pouch first
 
 ## Controls
 
 - **Right-click with pouch in hand**
-    - Opens that pouch directly
+  - Opens that pouch directly
 - **Shift + Right-click with pouch in hand**
-    - Swaps/equips it into the belt slot (if Accessories or Curios is installed)
+  - Swaps/equips it into the belt slot (if Accessories or Curios is installed)
 
 From the pouch screen, you can manage stored emeralds through a container UI.
 
@@ -103,19 +115,19 @@ From the pouch screen, you can manage stored emeralds through a container UI.
 Emerald Pouch currently includes built-in compatibility with:
 
 - **[Accessories](https://modrinth.com/mod/accessories)**
-    - Supports equipping pouches in the belt slot
-    - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
-    - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
-    - **Shift + Right-click** can quickly equip a pouch into the belt slot
+  - Supports equipping pouches in the belt slot
+  - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
+  - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
+  - **Shift + Right-click** can quickly equip a pouch into the belt slot
 
 - **[Curios](https://modrinth.com/mod/curios)**
-    - Supports equipping pouches in the belt slot
-    - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
-    - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
-    - **Shift + Right-click** can quickly equip a pouch into the belt slot
+  - Supports equipping pouches in the belt slot
+  - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
+  - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
+  - **Shift + Right-click** can quickly equip a pouch into the belt slot
 
 - **[ShulkerBoxTooltip](https://modrinth.com/mod/shulkerboxtooltip)**
-    - Allows pouch contents to be previewed directly in the tooltip, similar to other container-style items
+  - Allows pouch contents to be previewed directly in the tooltip, similar to other container-style items
 
 If there is a specific mod you would like compatibility support for, feel free to open an issue on the [GitHub](https://github.com/JevenDev/Emerald-Pouch/issues) repo.
 
@@ -124,7 +136,9 @@ If there is a specific mod you would like compatibility support for, feel free t
 ## Version and Loader
 
 - ✅ **NeoForge 1.21.1** [Active development]
-- 🚧 **NeoForge 1.20.1** [Planned backport]
+- ⛔ **NeoForge 1.20.1** [Not planned]
+- ⛔ **Forge 1.21.1** [Not planned]
+- ✅ **Forge 1.20.1** [Active development]
 - 🚧 **Fabric 1.21.1** [Planned port]
 - 🚧 **Fabric 1.20.1** [Planned port]
 
@@ -153,7 +167,7 @@ Looking to port the mod to your favourite loader/version outside of my scope? Fe
 For any general queries/unlisted questions, DM me on Twitter (@prodbyjvn) / Discord (ijvn).
 
 <div align="center">
-
-  <p><strong>⚠ <em>This mod ONLY exists on Modrinth as of April 2026. Any sites hosting this mod outside of Modrinth are not official releases. I will eventually upload the mod to CurseForge once it is in a more polished state.</em> ⚠</strong></p>
-
+  
+  <p><strong>⚠ <em>This mod ONLY exists on Modrinth & CurseForge as of April 2026. Any sites hosting this mod outside of Modrinth/CurseForge are not official releases.</em> ⚠</strong></p>
+  
 </div>
