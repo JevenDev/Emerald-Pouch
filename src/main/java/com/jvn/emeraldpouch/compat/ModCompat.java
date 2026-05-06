@@ -24,6 +24,6 @@ public final class ModCompat {
     }
 
     public static boolean hasSlotCompatLoaded() {
-        return false;
+        return CURIOS_LOADED || ACCESSORIES_LOADED;
     }
 }

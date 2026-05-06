@@ -35,6 +35,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public final class EmeraldPouchClient {
     private static final ResourceLocation EMERALD_POUCH_HUD_TEXTURE =
@@ -98,7 +99,10 @@ public final class EmeraldPouchClient {
     private static final int MERCHANT_RESULT_SLOT_X = 220;
     private static final int MERCHANT_RESULT_SLOT_Y = 37;
     private static final int SLOT_SIZE = 16;
-    private static final Field MERCHANT_SCROLL_OFFSET_FIELD = findField(MerchantScreen.class, "scrollOff");
+    private static final String MERCHANT_SCROLL_OFFSET_DEV_NAME = "scrollOff";
+    private static final String MERCHANT_SCROLL_OFFSET_SRG_NAME = "f_99119_";
+    private static final Field MERCHANT_SCROLL_OFFSET_FIELD =
+            findField(MerchantScreen.class, MERCHANT_SCROLL_OFFSET_SRG_NAME, MERCHANT_SCROLL_OFFSET_DEV_NAME);
     private static boolean showPouchText = true;
     private static boolean shiftClickedMerchantResult = false;
 
@@ -528,21 +532,33 @@ public final class EmeraldPouchClient {
     }
 
     private static int getMerchantScrollOffset(MerchantScreen screen) {
+        if (MERCHANT_SCROLL_OFFSET_FIELD == null) {
+            return 0;
+        }
+
         try {
             return MERCHANT_SCROLL_OFFSET_FIELD.getInt(screen);
         } catch (IllegalAccessException exception) {
-            throw new IllegalStateException("Unable to read merchant screen scroll offset", exception);
+            return 0;
         }
     }
 
-    private static Field findField(Class<?> type, String fieldName) {
-        try {
-            Field field = type.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field;
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + fieldName, exception);
+    private static Field findField(Class<?> type, String... fieldNames) {
+        for (String fieldName : fieldNames) {
+            try {
+                return ObfuscationReflectionHelper.findField(type, fieldName);
+            } catch (RuntimeException ignored) {
+                try {
+                    Field field = type.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    return field;
+                } catch (ReflectiveOperationException ignoredAgain) {
+                    // Try the next candidate name.
+                }
+            }
         }
+
+        return null;
     }
 
     private record DisplayLayout(int iconX, int iconY, int textX, int textY, int textWidth) {

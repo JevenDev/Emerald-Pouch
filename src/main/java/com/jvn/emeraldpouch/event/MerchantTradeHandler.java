@@ -16,10 +16,17 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.TradeWithVillagerEvent;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public final class MerchantTradeHandler {
-    private static final Field TRADE_CONTAINER_FIELD = findField(MerchantMenu.class, "tradeContainer");
-    private static final Field SELECTION_HINT_FIELD = findField(MerchantContainer.class, "selectionHint");
+    private static final String TRADE_CONTAINER_DEV_NAME = "tradeContainer";
+    private static final String TRADE_CONTAINER_SRG_NAME = "f_40028_";
+    private static final String SELECTION_HINT_DEV_NAME = "selectionHint";
+    private static final String SELECTION_HINT_SRG_NAME = "f_40000_";
+    private static final Field TRADE_CONTAINER_FIELD =
+            findField(MerchantMenu.class, TRADE_CONTAINER_DEV_NAME, TRADE_CONTAINER_SRG_NAME);
+    private static final Field SELECTION_HINT_FIELD =
+            findField(MerchantContainer.class, SELECTION_HINT_DEV_NAME, SELECTION_HINT_SRG_NAME);
     private static final Map<UUID, TradeSession> ACTIVE_TRADE_SESSIONS = new HashMap<>();
 
     private MerchantTradeHandler() {
@@ -88,6 +95,10 @@ public final class MerchantTradeHandler {
         );
 
         MerchantContainer tradeContainer = getTradeContainer(merchantMenu);
+        if (tradeContainer == null) {
+            return;
+        }
+
         int selectionHint = getSelectionHint(tradeContainer);
         if (selectionHint < 0 || selectionHint >= merchantMenu.getOffers().size()) {
             return;
@@ -127,7 +138,12 @@ public final class MerchantTradeHandler {
     }
 
     private static void refillCurrentSelection(ServerPlayer player, MerchantMenu merchantMenu) {
-        int selectionHint = getSelectionHint(getTradeContainer(merchantMenu));
+        MerchantContainer tradeContainer = getTradeContainer(merchantMenu);
+        if (tradeContainer == null) {
+            return;
+        }
+
+        int selectionHint = getSelectionHint(tradeContainer);
         if (selectionHint < 0 || selectionHint >= merchantMenu.getOffers().size()) {
             return;
         }
@@ -195,29 +211,45 @@ public final class MerchantTradeHandler {
     }
 
     private static MerchantContainer getTradeContainer(MerchantMenu merchantMenu) {
+        if (TRADE_CONTAINER_FIELD == null) {
+            return null;
+        }
+
         try {
             return (MerchantContainer) TRADE_CONTAINER_FIELD.get(merchantMenu);
         } catch (IllegalAccessException exception) {
-            throw new IllegalStateException("Unable to read merchant trade container", exception);
+            return null;
         }
     }
 
     private static int getSelectionHint(MerchantContainer tradeContainer) {
+        if (SELECTION_HINT_FIELD == null) {
+            return -1;
+        }
+
         try {
             return SELECTION_HINT_FIELD.getInt(tradeContainer);
         } catch (IllegalAccessException exception) {
-            throw new IllegalStateException("Unable to read merchant selection hint", exception);
+            return -1;
         }
     }
 
-    private static Field findField(Class<?> type, String fieldName) {
-        try {
-            Field field = type.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field;
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + fieldName, exception);
+    private static Field findField(Class<?> type, String... fieldNames) {
+        for (String fieldName : fieldNames) {
+            try {
+                return ObfuscationReflectionHelper.findField(type, fieldName);
+            } catch (RuntimeException ignored) {
+                try {
+                    Field field = type.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    return field;
+                } catch (ReflectiveOperationException ignoredAgain) {
+                    // Try the next candidate name.
+                }
+            }
         }
+
+        return null;
     }
 
     private static final class TradeSession {
