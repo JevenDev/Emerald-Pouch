@@ -10,7 +10,7 @@ import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import com.jvn.emeraldpouch.screen.PouchScreen;
-import com.jvn.toucanlib.util.toucanResourceLocations;
+import com.jvn.toucanlib.util.ToucanResourceLocations;
 import java.lang.reflect.Field;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -531,7 +531,7 @@ public final class EmeraldPouchClient {
     }
 
     private static ResourceLocation id(String path) {
-        return toucanResourceLocations.id(EmeraldPouchMod.MOD_ID, path);
+        return ToucanResourceLocations.id(EmeraldPouchMod.MOD_ID, path);
     }
 
     private record DisplayLayout(int iconX, int iconY, int textX, int textY, int textWidth) {

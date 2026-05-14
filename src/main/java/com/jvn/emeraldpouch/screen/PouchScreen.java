@@ -2,7 +2,7 @@ package com.jvn.emeraldpouch.screen;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.menu.PouchMenu;
-import com.jvn.toucanlib.util.toucanResourceLocations;
+import com.jvn.toucanlib.util.ToucanResourceLocations;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -126,6 +126,6 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     }
 
     private static ResourceLocation id(String path) {
-        return toucanResourceLocations.id(EmeraldPouchMod.MOD_ID, path);
+        return ToucanResourceLocations.id(EmeraldPouchMod.MOD_ID, path);
     }
 }

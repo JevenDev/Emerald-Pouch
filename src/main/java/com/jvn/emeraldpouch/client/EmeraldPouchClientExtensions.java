@@ -1,6 +1,6 @@
 package com.jvn.emeraldpouch.client;
 
-import com.jvn.toucanlib.neoforge.config.toucanConfigScreens;
+import com.jvn.toucanlib.neoforge.config.ToucanConfigScreens;
 import java.util.function.BiFunction;
 import net.neoforged.fml.ModContainer;
 import net.minecraft.client.gui.screens.Screen;
@@ -11,6 +11,6 @@ public final class EmeraldPouchClientExtensions {
     }
 
     public static void registerConfigScreen(ModContainer modContainer) {
-        toucanConfigScreens.register(modContainer, (BiFunction<ModContainer, Screen, Screen>) ConfigurationScreen::new);
+        ToucanConfigScreens.register(modContainer, (BiFunction<ModContainer, Screen, Screen>) ConfigurationScreen::new);
     }
 }
