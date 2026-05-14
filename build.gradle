@@ -31,6 +31,16 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven { url = uri("https://maven.architectury.dev/") }
+    exclusiveContent {
+        forRepository {
+            maven {
+                url = uri("https://cursemaven.com/")
+            }
+        }
+        filter {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 base {
@@ -121,7 +131,7 @@ configurations {
 }
 
 dependencies {
-    implementation "com.jvn.toucanlib:toucanlib-neoforge-${minecraft_version}:0.1.0"
+    implementation "curse.maven:toucanlib-1542666:8088512"
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

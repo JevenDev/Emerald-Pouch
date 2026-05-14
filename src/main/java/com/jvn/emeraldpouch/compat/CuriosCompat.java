@@ -1,6 +1,6 @@
 package com.jvn.emeraldpouch.compat;
 
-import com.jvn.toucanlib.util.toucanResourceLocations;
+import com.jvn.toucanlib.util.ToucanResourceLocations;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,7 +12,7 @@ import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 public final class CuriosCompat {
     private static final EntityCapability<IItemHandler, Void> CURIOS_INVENTORY = EntityCapability.createVoid(
-            toucanResourceLocations.id("curios", "item_handler"),
+            ToucanResourceLocations.id("curios", "item_handler"),
             IItemHandler.class
     );
 
