@@ -48,7 +48,10 @@ public final class MerchantTradeHandler {
             return;
         }
 
-        depositRemainingEmeralds(serverPlayer.getInventory(), session.pouchEmeraldBalance());
+        serverPlayer.server.execute(() -> {
+            depositRemainingEmeralds(serverPlayer.getInventory(), session.pouchEmeraldBalance());
+            syncPlayerInventory(serverPlayer);
+        });
     }
 
     public static void onTradeWithVillager(TradeWithVillagerEvent event) {
@@ -151,6 +154,12 @@ public final class MerchantTradeHandler {
         if (!remainder.isEmpty()) {
             inventory.placeItemBackInInventory(remainder);
         }
+    }
+
+    private static void syncPlayerInventory(ServerPlayer player) {
+        player.getInventory().setChanged();
+        player.inventoryMenu.broadcastFullState();
+        player.inventoryMenu.sendAllDataToRemote();
     }
 
     private static int emeraldCost(ItemStack stack) {

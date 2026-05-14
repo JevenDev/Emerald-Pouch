@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import com.jvn.toucanlib.util.toucanResourceLocations;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
@@ -96,7 +96,7 @@ public final class AccessoriesCompat {
         try {
             Class<?> capabilityClass = Class.forName(ACCESSORIES_CAPABILITY_CLASS_NAME);
             return (EntityCapability<Object, Void>) (EntityCapability) EntityCapability.createVoid(
-                    ResourceLocation.fromNamespaceAndPath("accessories", "capability"),
+                    toucanResourceLocations.id("accessories", "capability"),
                     (Class) capabilityClass
             );
         } catch (ClassNotFoundException ignored) {
