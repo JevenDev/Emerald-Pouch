@@ -10,6 +10,7 @@ import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import com.jvn.emeraldpouch.screen.PouchScreen;
+import com.jvn.toucanlib.util.toucanResourceLocations;
 import java.lang.reflect.Field;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -36,42 +37,24 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class EmeraldPouchClient {
-    private static final ResourceLocation EMERALD_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch.png");
-    private static final ResourceLocation BLACK_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/black_emerald_pouch.png");
-    private static final ResourceLocation BLUE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/blue_emerald_pouch.png");
-    private static final ResourceLocation BROWN_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/brown_emerald_pouch.png");
-    private static final ResourceLocation CYAN_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/cyan_emerald_pouch.png");
-    private static final ResourceLocation GRAY_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/gray_emerald_pouch.png");
-    private static final ResourceLocation GREEN_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/green_emerald_pouch.png");
-    private static final ResourceLocation LIGHT_BLUE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_blue_emerald_pouch.png");
-    private static final ResourceLocation LIGHT_GRAY_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/light_gray_emerald_pouch.png");
-    private static final ResourceLocation LIME_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/lime_emerald_pouch.png");
-    private static final ResourceLocation MAGENTA_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/magenta_emerald_pouch.png");
-    private static final ResourceLocation ORANGE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/orange_emerald_pouch.png");
-    private static final ResourceLocation PINK_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/pink_emerald_pouch.png");
-    private static final ResourceLocation PURPLE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/purple_emerald_pouch.png");
-    private static final ResourceLocation RED_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/red_emerald_pouch.png");
-    private static final ResourceLocation WHITE_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/white_emerald_pouch.png");
-    private static final ResourceLocation YELLOW_POUCH_HUD_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/yellow_emerald_pouch.png");
-    private static final ResourceLocation POUCH_HUD_HOVER_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "textures/gui/hud/emerald_pouch_hover.png");
+    private static final ResourceLocation EMERALD_POUCH_HUD_TEXTURE = id("textures/gui/hud/emerald_pouch.png");
+    private static final ResourceLocation BLACK_POUCH_HUD_TEXTURE = id("textures/gui/hud/black_emerald_pouch.png");
+    private static final ResourceLocation BLUE_POUCH_HUD_TEXTURE = id("textures/gui/hud/blue_emerald_pouch.png");
+    private static final ResourceLocation BROWN_POUCH_HUD_TEXTURE = id("textures/gui/hud/brown_emerald_pouch.png");
+    private static final ResourceLocation CYAN_POUCH_HUD_TEXTURE = id("textures/gui/hud/cyan_emerald_pouch.png");
+    private static final ResourceLocation GRAY_POUCH_HUD_TEXTURE = id("textures/gui/hud/gray_emerald_pouch.png");
+    private static final ResourceLocation GREEN_POUCH_HUD_TEXTURE = id("textures/gui/hud/green_emerald_pouch.png");
+    private static final ResourceLocation LIGHT_BLUE_POUCH_HUD_TEXTURE = id("textures/gui/hud/light_blue_emerald_pouch.png");
+    private static final ResourceLocation LIGHT_GRAY_POUCH_HUD_TEXTURE = id("textures/gui/hud/light_gray_emerald_pouch.png");
+    private static final ResourceLocation LIME_POUCH_HUD_TEXTURE = id("textures/gui/hud/lime_emerald_pouch.png");
+    private static final ResourceLocation MAGENTA_POUCH_HUD_TEXTURE = id("textures/gui/hud/magenta_emerald_pouch.png");
+    private static final ResourceLocation ORANGE_POUCH_HUD_TEXTURE = id("textures/gui/hud/orange_emerald_pouch.png");
+    private static final ResourceLocation PINK_POUCH_HUD_TEXTURE = id("textures/gui/hud/pink_emerald_pouch.png");
+    private static final ResourceLocation PURPLE_POUCH_HUD_TEXTURE = id("textures/gui/hud/purple_emerald_pouch.png");
+    private static final ResourceLocation RED_POUCH_HUD_TEXTURE = id("textures/gui/hud/red_emerald_pouch.png");
+    private static final ResourceLocation WHITE_POUCH_HUD_TEXTURE = id("textures/gui/hud/white_emerald_pouch.png");
+    private static final ResourceLocation YELLOW_POUCH_HUD_TEXTURE = id("textures/gui/hud/yellow_emerald_pouch.png");
+    private static final ResourceLocation POUCH_HUD_HOVER_TEXTURE = id("textures/gui/hud/emerald_pouch_hover.png");
     private static final int HUD_ICON_SIZE = 16;
     private static final int XP_TEXT_COLOR = 8453920;
     private static final int WHITE_TEXT_COLOR = 16777215;
@@ -109,12 +92,12 @@ public final class EmeraldPouchClient {
     }
 
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-        event.register(ModKeyMappings.OPEN_FIRST_POUCH);
+        ModKeyMappings.register();
     }
 
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ResourceLocation openedPropertyId = ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "opened");
+            ResourceLocation openedPropertyId = id("opened");
             for (var item : ModItems.allPouchItems()) {
                 ItemProperties.register(item.get(), openedPropertyId, EmeraldPouchClient::openedProperty);
             }
@@ -545,6 +528,10 @@ public final class EmeraldPouchClient {
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + fieldName, exception);
         }
+    }
+
+    private static ResourceLocation id(String path) {
+        return toucanResourceLocations.id(EmeraldPouchMod.MOD_ID, path);
     }
 
     private record DisplayLayout(int iconX, int iconY, int textX, int textY, int textWidth) {

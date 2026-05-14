@@ -2,6 +2,7 @@ package com.jvn.emeraldpouch.screen;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.menu.PouchMenu;
+import com.jvn.toucanlib.util.toucanResourceLocations;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -19,18 +20,12 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     private static final int BUTTON_GAP = 1;
     private static final int BUTTON_RIGHT_MARGIN = 7;
     private static final int BUTTON_TOP_MARGIN = 4;
-    private static final ResourceLocation COMPACT_DEFAULT =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button");
-    private static final ResourceLocation COMPACT_SELECTED =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button_selected");
-    private static final ResourceLocation COMPACT_HOVER =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/compact_button_hover");
-    private static final ResourceLocation PICKUP_DEFAULT =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button");
-    private static final ResourceLocation PICKUP_SELECTED =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button_selected");
-    private static final ResourceLocation PICKUP_HOVER =
-            ResourceLocation.fromNamespaceAndPath(EmeraldPouchMod.MOD_ID, "pouch/pickup_button_hover");
+    private static final ResourceLocation COMPACT_DEFAULT = id("pouch/compact_button");
+    private static final ResourceLocation COMPACT_SELECTED = id("pouch/compact_button_selected");
+    private static final ResourceLocation COMPACT_HOVER = id("pouch/compact_button_hover");
+    private static final ResourceLocation PICKUP_DEFAULT = id("pouch/pickup_button");
+    private static final ResourceLocation PICKUP_SELECTED = id("pouch/pickup_button_selected");
+    private static final ResourceLocation PICKUP_HOVER = id("pouch/pickup_button_hover");
     private static final Component COMPACT_NAME = Component.translatable("screen.emeraldpouch.auto_compact.name");
     private static final Component PICKUP_NAME = Component.translatable("screen.emeraldpouch.auto_pickup.name");
 
@@ -128,5 +123,9 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_INSERT, 1.0F, 0.5F));
             openSoundPlayed = true;
         }
+    }
+
+    private static ResourceLocation id(String path) {
+        return toucanResourceLocations.id(EmeraldPouchMod.MOD_ID, path);
     }
 }

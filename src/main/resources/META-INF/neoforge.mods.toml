@@ -29,6 +29,13 @@ Portable emerald-only storage pouches with auto compact and auto pickup toggles.
     side="BOTH"
 
 [[dependencies.${mod_id}]]
+    modId="toucanlib"
+    type="required"
+    versionRange="[0.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
     modId="shulkerboxtooltip"
     type="optional"
     versionRange="[0,)"

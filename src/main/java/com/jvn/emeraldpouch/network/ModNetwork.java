@@ -3,22 +3,24 @@ package com.jvn.emeraldpouch.network;
 import com.jvn.emeraldpouch.event.MerchantTradeHandler;
 import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
 import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
-import net.minecraft.server.level.ServerPlayer;
+import com.jvn.toucanlib.neoforge.network.toucanNetwork;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public final class ModNetwork {
+    private static final String NETWORK_VERSION = "1";
+
     private ModNetwork() {
     }
 
     public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
-        var registrar = event.registrar("1");
-        registrar.playToServer(
+        toucanNetwork network = toucanNetwork.create("emeraldpouch", NETWORK_VERSION, event);
+        network.playToServer(
                 OpenFirstPouchPayload.TYPE,
                 OpenFirstPouchPayload.STREAM_CODEC,
                 ModNetwork::handleOpenFirstPouch
         );
-        registrar.playToServer(
+        network.playToServer(
                 MerchantTradeClickPayload.TYPE,
                 MerchantTradeClickPayload.STREAM_CODEC,
                 ModNetwork::handleMerchantTradeClick
@@ -26,27 +28,19 @@ public final class ModNetwork {
     }
 
     private static void handleOpenFirstPouch(OpenFirstPouchPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer serverPlayer)) {
-                return;
-            }
-
-            PouchInventoryAccess.findFirstPouch(serverPlayer.getInventory())
-                    .ifPresent(reference -> PouchMenuOpener.openFromReference(serverPlayer, reference));
-        });
+        toucanNetwork.enqueue(context, () -> toucanNetwork.withServerPlayer(context, serverPlayer ->
+                PouchInventoryAccess.findFirstPouch(serverPlayer.getInventory())
+                        .ifPresent(reference -> PouchMenuOpener.openFromReference(serverPlayer, reference))
+        ));
     }
 
     private static void handleMerchantTradeClick(MerchantTradeClickPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer serverPlayer)) {
-                return;
-            }
-
+        toucanNetwork.enqueue(context, () -> toucanNetwork.withServerPlayer(context, serverPlayer -> {
             if (payload.shiftResultClick()) {
                 MerchantTradeHandler.onShiftTradeResultClick(serverPlayer);
             } else {
                 MerchantTradeHandler.onTradeSelectionClick(serverPlayer);
             }
-        });
+        }));
     }
 }
