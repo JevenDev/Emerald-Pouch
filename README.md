@@ -2,6 +2,7 @@
   
 <a href="https://modrinth.com/mod/emerald-pouch/settings/versions?l=neoforge"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/supported/neoforge_64h.png" alt="Available for NeoForge"></a>
 <a href="https://modrinth.com/mod/emerald-pouch/settings/versions?l=forge"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/supported/forge_64h.png" alt="Available for Forge"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/toucanlib"><img src="https://raw.githubusercontent.com/JevenDev/toucanLib/refs/heads/main/docs/badges/toucanlib_toucanlib_cozy_64h.png?token=GHSAT0AAAAAADKDWV4CFOIZUR4I6XJU3YVQ2QGBZNA" alt="Requires toucanLib"></a>
 <br>
 <a href="https://modrinth.com/mod/emerald-pouch" target="_blank" rel="noopener noreferrer"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/compact-minimal/available/modrinth_46h.png" alt="Available on Modrinth"></a>
 <a href="https://www.curseforge.com/minecraft/mc-mods/emerald-pouch" target="_blank" rel="noopener noreferrer"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/compact-minimal/available/curseforge_46h.png" alt="Available on CurseForge"></a>
