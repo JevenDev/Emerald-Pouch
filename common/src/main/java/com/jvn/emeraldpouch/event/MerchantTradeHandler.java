@@ -1,6 +1,5 @@
 package com.jvn.emeraldpouch.event;
 
-import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,13 +7,13 @@ import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MerchantContainer;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
-import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
-import net.neoforged.neoforge.event.entity.player.TradeWithVillagerEvent;
+import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
 
 public final class MerchantTradeHandler {
     private static final Field TRADE_CONTAINER_FIELD = findField(MerchantMenu.class, "tradeContainer");
@@ -24,18 +23,16 @@ public final class MerchantTradeHandler {
     private MerchantTradeHandler() {
     }
 
-    public static void onContainerOpened(PlayerContainerEvent.Open event) {
-        Player player = event.getEntity();
-        if (player.level().isClientSide() || !(event.getContainer() instanceof MerchantMenu merchantMenu)) {
+    public static void onContainerOpened(Player player, AbstractContainerMenu containerMenu) {
+        if (player.level().isClientSide() || !(containerMenu instanceof MerchantMenu merchantMenu)) {
             return;
         }
 
         ACTIVE_TRADE_SESSIONS.put(player.getUUID(), new TradeSession(merchantMenu.containerId));
     }
 
-    public static void onContainerClosed(PlayerContainerEvent.Close event) {
-        Player player = event.getEntity();
-        if (player.level().isClientSide() || !(event.getContainer() instanceof MerchantMenu merchantMenu)) {
+    public static void onContainerClosed(Player player, AbstractContainerMenu containerMenu) {
+        if (player.level().isClientSide() || !(containerMenu instanceof MerchantMenu merchantMenu)) {
             return;
         }
 
@@ -52,26 +49,6 @@ public final class MerchantTradeHandler {
             depositRemainingEmeralds(serverPlayer.getInventory(), session.pouchEmeraldBalance());
             syncPlayerInventory(serverPlayer);
         });
-    }
-
-    public static void onTradeWithVillager(TradeWithVillagerEvent event) {
-        Player player = event.getEntity();
-        if (player.level().isClientSide() || !(player.containerMenu instanceof MerchantMenu merchantMenu)) {
-            return;
-        }
-
-        TradeSession session = ACTIVE_TRADE_SESSIONS.get(player.getUUID());
-        if (session == null || session.containerId() != merchantMenu.containerId) {
-            return;
-        }
-
-        int emeraldCost = emeraldCost(event.getMerchantOffer().getCostA()) + emeraldCost(event.getMerchantOffer().getCostB());
-        session.consumePouchEmeralds(emeraldCost);
-
-        if (session.isShiftResultRefillPending() && player instanceof ServerPlayer serverPlayer) {
-            session.setShiftResultRefillPending(false);
-            refillCurrentSelection(serverPlayer, merchantMenu);
-        }
     }
 
     public static void onTradeSelectionClick(ServerPlayer player) {
@@ -109,7 +86,7 @@ public final class MerchantTradeHandler {
         }
     }
 
-    public static void onShiftTradeResultClick(ServerPlayer player) {
+    public static void onTradeResultClick(ServerPlayer player, boolean shiftResultClick) {
         if (!(player.containerMenu instanceof MerchantMenu merchantMenu)) {
             return;
         }
@@ -123,9 +100,20 @@ public final class MerchantTradeHandler {
                     return new TradeSession(merchantMenu.containerId);
                 }
         );
-        session.setShiftResultRefillPending(true);
 
-        // Best-effort immediate refill in case this packet arrives after the trade click packet.
+        int selectionHint = getSelectionHint(getTradeContainer(merchantMenu));
+        if (selectionHint < 0 || selectionHint >= merchantMenu.getOffers().size()) {
+            return;
+        }
+
+        MerchantOffer offer = merchantMenu.getOffers().get(selectionHint);
+        int emeraldCost = emeraldCost(offer.getCostA()) + emeraldCost(offer.getCostB());
+        session.consumePouchEmeralds(emeraldCost);
+        if (!shiftResultClick) {
+            return;
+        }
+
+        session.setShiftResultRefillPending(true);
         refillCurrentSelection(player, merchantMenu);
     }
 
@@ -251,10 +239,6 @@ public final class MerchantTradeHandler {
             if (amount > 0) {
                 this.pouchEmeraldBalance = Math.max(0, this.pouchEmeraldBalance - amount);
             }
-        }
-
-        public boolean isShiftResultRefillPending() {
-            return this.shiftResultRefillPending;
         }
 
         public void setShiftResultRefillPending(boolean shiftResultRefillPending) {

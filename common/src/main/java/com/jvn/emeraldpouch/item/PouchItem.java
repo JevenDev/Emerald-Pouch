@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch.item;
 
 import com.jvn.emeraldpouch.compat.ModCompat;
+import com.jvn.emeraldpouch.compat.PouchSlotAccess;
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
 import java.util.List;
@@ -45,6 +46,9 @@ public class PouchItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack heldStack = player.getItemInHand(usedHand);
         if (player.isShiftKeyDown() && ModCompat.hasSlotCompatLoaded()) {
+            if (player instanceof ServerPlayer serverPlayer && PouchSlotAccess.tryEquipFromHand(serverPlayer, usedHand)) {
+                return InteractionResultHolder.sidedSuccess(serverPlayer.getItemInHand(usedHand), false);
+            }
             return InteractionResultHolder.pass(heldStack);
         }
 

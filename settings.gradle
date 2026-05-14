@@ -12,6 +12,7 @@ plugins {
 }
 
 include("common")
+include("fabric")
 include("neoforge")
 
 rootProject.name = "Emerald-Pouch"

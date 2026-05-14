@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch.compat;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -35,6 +36,11 @@ public final class PouchSlotAccess {
 
     @ExpectPlatform
     public static void setCuriosStack(Player player, int slot, ItemStack stack) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static boolean tryEquipFromHand(Player player, InteractionHand hand) {
         throw new AssertionError();
     }
 }

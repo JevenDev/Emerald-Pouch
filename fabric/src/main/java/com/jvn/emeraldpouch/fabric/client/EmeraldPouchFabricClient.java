@@ -1,42 +1,48 @@
-package com.jvn.emeraldpouch.client;
+package com.jvn.emeraldpouch.fabric.client;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
-import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
+import com.jvn.emeraldpouch.client.ModKeyMappings;
+import com.jvn.emeraldpouch.client.PouchClientSettings;
+import com.jvn.emeraldpouch.client.PouchDisplayData;
 import com.jvn.emeraldpouch.network.MerchantTradeClickPayload;
 import com.jvn.emeraldpouch.network.OpenFirstPouchPayload;
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
 import com.jvn.emeraldpouch.screen.PouchScreen;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.jvn.toucanlib.util.ToucanResourceLocations;
-import java.lang.reflect.Field;
-import java.util.List;
+import dev.architectury.event.EventResult;
+import dev.architectury.event.events.client.ClientGuiEvent;
+import dev.architectury.event.events.client.ClientRawInputEvent;
+import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.registry.menu.MenuRegistry;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraft.world.item.ItemStack;
+import java.lang.reflect.Field;
+import java.util.List;
 
-public final class EmeraldPouchClient {
+public final class EmeraldPouchFabricClient implements ClientModInitializer {
     private static final ResourceLocation EMERALD_POUCH_HUD_TEXTURE = id("textures/gui/hud/emerald_pouch.png");
     private static final ResourceLocation BLACK_POUCH_HUD_TEXTURE = id("textures/gui/hud/black_emerald_pouch.png");
     private static final ResourceLocation BLUE_POUCH_HUD_TEXTURE = id("textures/gui/hud/blue_emerald_pouch.png");
@@ -80,47 +86,45 @@ public final class EmeraldPouchClient {
     private static final int MERCHANT_RESULT_SLOT_X = 220;
     private static final int MERCHANT_RESULT_SLOT_Y = 37;
     private static final int SLOT_SIZE = 16;
+    private static final Field ABSTRACT_CONTAINER_LEFT_POS_FIELD = findField(AbstractContainerScreen.class, "leftPos");
+    private static final Field ABSTRACT_CONTAINER_TOP_POS_FIELD = findField(AbstractContainerScreen.class, "topPos");
+    private static final Field ABSTRACT_CONTAINER_IMAGE_WIDTH_FIELD = findField(AbstractContainerScreen.class, "imageWidth");
     private static final Field MERCHANT_SCROLL_OFFSET_FIELD = findField(MerchantScreen.class, "scrollOff");
     private static boolean showPouchText = true;
     private static boolean merchantResultClicked = false;
     private static boolean shiftClickedMerchantResult = false;
 
-    private EmeraldPouchClient() {
-    }
-
-    public static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(ModMenus.POUCH_MENU.get(), PouchScreen::new);
-    }
-
-    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+    @Override
+    public void onInitializeClient() {
+        MenuRegistry.registerScreenFactory(ModMenus.POUCH_MENU.get(), PouchScreen::new);
         ModKeyMappings.register();
-    }
 
-    public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            ResourceLocation openedPropertyId = id("opened");
-            for (var item : ModItems.allPouchItems()) {
-                ItemProperties.register(item.get(), openedPropertyId, EmeraldPouchClient::openedProperty);
-            }
+        ResourceLocation openedPropertyId = id("opened");
+        for (var item : ModItems.allPouchItems()) {
+            ItemProperties.register(item.get(), openedPropertyId, EmeraldPouchFabricClient::openedProperty);
+        }
+
+        ClientTickEvent.CLIENT_POST.register(EmeraldPouchFabricClient::onClientTick);
+        ClientGuiEvent.RENDER_HUD.register(EmeraldPouchFabricClient::onRenderHud);
+        ClientGuiEvent.RENDER_POST.register(EmeraldPouchFabricClient::onScreenRenderPost);
+        ClientRawInputEvent.MOUSE_CLICKED_PRE.register(EmeraldPouchFabricClient::onMouseButtonInputPre);
+        ScreenEvents.AFTER_INIT.register((minecraft, screen, scaledWidth, scaledHeight) -> {
+            ScreenMouseEvents.allowMouseClick(screen).register(EmeraldPouchFabricClient::onScreenMouseButtonPressedPre);
+            ScreenMouseEvents.afterMouseClick(screen).register(EmeraldPouchFabricClient::onScreenMouseButtonPressedPost);
         });
     }
 
-    public static void onClientTick(ClientTickEvent.Post event) {
-        Minecraft minecraft = Minecraft.getInstance();
+    private static void onClientTick(Minecraft minecraft) {
         if (minecraft.player == null || minecraft.level == null || minecraft.screen != null) {
             return;
         }
 
         while (ModKeyMappings.OPEN_FIRST_POUCH.consumeClick()) {
-            PacketDistributor.sendToServer(new OpenFirstPouchPayload());
+            ClientPlayNetworking.send(new OpenFirstPouchPayload());
         }
     }
 
-    public static void onRenderGuiLayerPost(RenderGuiLayerEvent.Post event) {
-        if (!VanillaGuiLayers.EXPERIENCE_LEVEL.equals(event.getName())) {
-            return;
-        }
-
+    private static void onRenderHud(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
         if (player == null || minecraft.level == null || minecraft.options.hideGui) {
@@ -133,7 +137,7 @@ public final class EmeraldPouchClient {
         }
 
         renderHudPouchCounter(
-                event.getGuiGraphics(),
+                guiGraphics,
                 minecraft,
                 displayData.compactEmeraldAmount(),
                 displayData.pouchCount(),
@@ -141,8 +145,8 @@ public final class EmeraldPouchClient {
         );
     }
 
-    public static void onScreenRenderPost(ScreenEvent.Render.Post event) {
-        if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)
+    private static void onScreenRenderPost(Screen screen, GuiGraphics guiGraphics, int mouseX, int mouseY, DeltaTracker deltaTracker) {
+        if (!(screen instanceof AbstractContainerScreen<?> containerScreen)
                 || !(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
             return;
         }
@@ -158,92 +162,74 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        GuiGraphics guiGraphics = event.getGuiGraphics();
         String counterText = displayData.compactEmeraldAmount();
         DisplayLayout layout = computeInventoryLayout(minecraft, containerScreen, counterText);
-        boolean hoverIcon = isHovered(event.getMouseX(), event.getMouseY(), layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
-        renderIconAndMaybeText(
-                guiGraphics,
-                minecraft,
-                counterText,
-                displayData.pouchCount(),
-                layout,
-                hudIconTexture(),
-                hoverIcon
-        );
+        boolean hoverIcon = isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
+        renderIconAndMaybeText(guiGraphics, minecraft, counterText, displayData.pouchCount(), layout, hudIconTexture(), hoverIcon);
 
         boolean hoverText = showPouchText
-                && isHovered(event.getMouseX(), event.getMouseY(), layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
+                && isHovered(mouseX, mouseY, layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
         if (hoverIcon || hoverText) {
-            guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), java.util.Optional.empty(), event.getMouseX(), event.getMouseY());
+            guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), java.util.Optional.empty(), mouseX, mouseY);
         }
     }
 
-    public static void onScreenMouseButtonPressedPre(ScreenEvent.MouseButtonPressed.Pre event) {
+    private static boolean onScreenMouseButtonPressedPre(Screen screen, double mouseX, double mouseY, int button) {
         merchantResultClicked = false;
         shiftClickedMerchantResult = false;
 
-        if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT) {
-            return;
+        if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+            return true;
         }
 
-        // Detect shift-click on the merchant result slot BEFORE vanilla empties it.
-        if (event.getScreen() instanceof MerchantScreen merchantScreen && Screen.hasShiftDown()) {
-            int rx = (int) event.getMouseX() - merchantScreen.getGuiLeft();
-            int ry = (int) event.getMouseY() - merchantScreen.getGuiTop();
+        if (screen instanceof MerchantScreen merchantScreen) {
+            int rx = (int) mouseX - screenLeft(merchantScreen);
+            int ry = (int) mouseY - screenTop(merchantScreen);
             if (rx >= MERCHANT_RESULT_SLOT_X && rx < MERCHANT_RESULT_SLOT_X + SLOT_SIZE
                     && ry >= MERCHANT_RESULT_SLOT_Y && ry < MERCHANT_RESULT_SLOT_Y + SLOT_SIZE
                     && merchantScreen.getMenu().getSlot(2).hasItem()) {
                 merchantResultClicked = true;
-                shiftClickedMerchantResult = true;
-            }
-        } else if (event.getScreen() instanceof MerchantScreen merchantScreen) {
-            int rx = (int) event.getMouseX() - merchantScreen.getGuiLeft();
-            int ry = (int) event.getMouseY() - merchantScreen.getGuiTop();
-            if (rx >= MERCHANT_RESULT_SLOT_X && rx < MERCHANT_RESULT_SLOT_X + SLOT_SIZE
-                    && ry >= MERCHANT_RESULT_SLOT_Y && ry < MERCHANT_RESULT_SLOT_Y + SLOT_SIZE
-                    && merchantScreen.getMenu().getSlot(2).hasItem()) {
-                merchantResultClicked = true;
+                shiftClickedMerchantResult = Screen.hasShiftDown();
             }
         }
 
-        if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)
+        if (!(screen instanceof AbstractContainerScreen<?> containerScreen)
                 || !(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
-            return;
+            return true;
         }
 
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
         if (player == null || minecraft.level == null) {
-            return;
+            return true;
         }
 
         PouchDisplayData displayData = PouchDisplayData.fromPlayerInventory(player);
         if (!displayData.hasPouches()) {
-            return;
+            return true;
         }
 
         DisplayLayout layout = computeInventoryLayout(minecraft, containerScreen, displayData.compactEmeraldAmount());
-        if (!isHovered(event.getMouseX(), event.getMouseY(), layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE)) {
-            return;
+        if (!isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE)) {
+            return true;
         }
 
         togglePouchTextVisibility(minecraft);
-        event.setCanceled(true);
+        return false;
     }
 
-    public static void onScreenMouseButtonPressedPost(ScreenEvent.MouseButtonPressed.Post event) {
-        if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT || !event.wasClickHandled()) {
+    private static void onScreenMouseButtonPressedPost(Screen screen, double mouseX, double mouseY, int button) {
+        if (button != InputConstants.MOUSE_BUTTON_LEFT) {
             return;
         }
 
-        if (!(event.getScreen() instanceof MerchantScreen merchantScreen)) {
+        if (!(screen instanceof MerchantScreen merchantScreen)) {
             return;
         }
 
         if (merchantResultClicked) {
             merchantResultClicked = false;
-            PacketDistributor.sendToServer(new MerchantTradeClickPayload(
+            ClientPlayNetworking.send(new MerchantTradeClickPayload(
                     shiftClickedMerchantResult
                             ? MerchantTradeClickPayload.ClickType.SHIFT_RESULT
                             : MerchantTradeClickPayload.ClickType.RESULT
@@ -252,8 +238,8 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        int relativeX = (int) event.getMouseX() - merchantScreen.getGuiLeft();
-        int relativeY = (int) event.getMouseY() - merchantScreen.getGuiTop();
+        int relativeX = (int) mouseX - screenLeft(merchantScreen);
+        int relativeY = (int) mouseY - screenTop(merchantScreen);
         if (relativeX < MERCHANT_TRADE_BUTTON_X || relativeX >= MERCHANT_TRADE_BUTTON_X + MERCHANT_TRADE_BUTTON_WIDTH) {
             return;
         }
@@ -269,27 +255,26 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        PacketDistributor.sendToServer(new MerchantTradeClickPayload(MerchantTradeClickPayload.ClickType.SELECTION));
+        ClientPlayNetworking.send(new MerchantTradeClickPayload(MerchantTradeClickPayload.ClickType.SELECTION));
     }
 
-    public static void onMouseButtonInputPre(InputEvent.MouseButton.Pre event) {
-        if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT || event.getAction() != InputConstants.PRESS) {
-            return;
+    private static EventResult onMouseButtonInputPre(Minecraft minecraft, int button, int action, int mods) {
+        if (button != InputConstants.MOUSE_BUTTON_LEFT || action != InputConstants.PRESS) {
+            return EventResult.pass();
         }
 
-        Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.screen != null || minecraft.options.hideGui) {
-            return;
+            return EventResult.pass();
         }
 
         Player player = minecraft.player;
         if (player == null || minecraft.level == null) {
-            return;
+            return EventResult.pass();
         }
 
         PouchDisplayData displayData = PouchDisplayData.fromPlayerInventory(player);
         if (!displayData.hasPouches()) {
-            return;
+            return EventResult.pass();
         }
 
         DisplayLayout layout = computeHudLayout(
@@ -303,14 +288,14 @@ public final class EmeraldPouchClient {
         int mouseX = scaledMouseX(minecraft);
         int mouseY = scaledMouseY(minecraft);
         if (!isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE)) {
-            return;
+            return EventResult.pass();
         }
 
         togglePouchTextVisibility(minecraft);
-        event.setCanceled(true);
+        return EventResult.interruptFalse();
     }
 
-    private static float openedProperty(net.minecraft.world.item.ItemStack stack, net.minecraft.client.multiplayer.ClientLevel level, net.minecraft.world.entity.LivingEntity entity, int seed) {
+    private static float openedProperty(ItemStack stack, ClientLevel level, LivingEntity entity, int seed) {
         return PouchData.isOpenedVisualEnabled(stack) ? 1.0F : 0.0F;
     }
 
@@ -318,36 +303,26 @@ public final class EmeraldPouchClient {
             GuiGraphics guiGraphics,
             Minecraft minecraft,
             String counterText,
-            int bundleCount,
+            int pouchCount,
             HumanoidArm mainArm
     ) {
         DisplayLayout layout = computeHudLayout(minecraft, guiGraphics.guiWidth(), guiGraphics.guiHeight(), counterText, mainArm);
         int mouseX = scaledMouseX(minecraft);
         int mouseY = scaledMouseY(minecraft);
         boolean hoverIcon = isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
-        renderIconAndMaybeText(guiGraphics, minecraft, counterText, bundleCount, layout, hudIconTexture(), hoverIcon);
+        renderIconAndMaybeText(guiGraphics, minecraft, counterText, pouchCount, layout, hudIconTexture(), hoverIcon);
     }
 
     private static void renderIconAndMaybeText(
             GuiGraphics guiGraphics,
             Minecraft minecraft,
             String text,
-            int bundleCount,
+            int pouchCount,
             DisplayLayout layout,
             ResourceLocation baseTexture,
             boolean hoverIcon
     ) {
-        guiGraphics.blit(
-                baseTexture,
-                layout.iconX(),
-                layout.iconY(),
-                0.0F,
-                0.0F,
-                HUD_ICON_SIZE,
-                HUD_ICON_SIZE,
-                HUD_ICON_SIZE,
-                HUD_ICON_SIZE
-        );
+        guiGraphics.blit(baseTexture, layout.iconX(), layout.iconY(), 0.0F, 0.0F, HUD_ICON_SIZE, HUD_ICON_SIZE, HUD_ICON_SIZE, HUD_ICON_SIZE);
 
         if (hoverIcon) {
             drawHoverOverlay(guiGraphics, layout.iconX(), layout.iconY());
@@ -357,32 +332,19 @@ public final class EmeraldPouchClient {
             drawXpStyleText(guiGraphics, minecraft, text, layout.textX(), layout.textY());
         }
 
-        if (EmeraldPouchClientConfig.showBundleCountOverlay()) {
-            String bundleText = Integer.toString(bundleCount);
+        if (PouchClientSettings.showBundleCountOverlay()) {
+            String bundleText = Integer.toString(pouchCount);
             int bundleTextX = layout.iconX() + (HUD_ICON_SIZE - minecraft.font.width(bundleText)) / 2 + BUNDLE_OVERLAY_TEXT_X_OFFSET;
             int bundleTextY = layout.iconY() + (HUD_ICON_SIZE - minecraft.font.lineHeight) / 2 + BUNDLE_OVERLAY_TEXT_Y_OFFSET;
             drawOutlinedText(guiGraphics, minecraft, bundleText, bundleTextX, bundleTextY, WHITE_TEXT_COLOR);
         }
     }
 
-    private static void drawXpStyleText(
-            GuiGraphics guiGraphics,
-            Minecraft minecraft,
-            String text,
-            int x,
-            int y
-    ) {
+    private static void drawXpStyleText(GuiGraphics guiGraphics, Minecraft minecraft, String text, int x, int y) {
         drawOutlinedText(guiGraphics, minecraft, text, x, y, XP_TEXT_COLOR);
     }
 
-    private static void drawOutlinedText(
-            GuiGraphics guiGraphics,
-            Minecraft minecraft,
-            String text,
-            int x,
-            int y,
-            int color
-    ) {
+    private static void drawOutlinedText(GuiGraphics guiGraphics, Minecraft minecraft, String text, int x, int y, int color) {
         guiGraphics.drawString(minecraft.font, text, x + 1, y, 0, false);
         guiGraphics.drawString(minecraft.font, text, x - 1, y, 0, false);
         guiGraphics.drawString(minecraft.font, text, x, y + 1, 0, false);
@@ -401,28 +363,15 @@ public final class EmeraldPouchClient {
     private static void drawHoverOverlay(GuiGraphics guiGraphics, int iconX, int iconY) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-
-        // Brighten only where the hover mask has alpha.
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
-        guiGraphics.blit(
-                POUCH_HUD_HOVER_TEXTURE,
-                iconX,
-                iconY,
-                0.0F,
-                0.0F,
-                HUD_ICON_SIZE,
-                HUD_ICON_SIZE,
-                HUD_ICON_SIZE,
-                HUD_ICON_SIZE
-        );
-
+        guiGraphics.blit(POUCH_HUD_HOVER_TEXTURE, iconX, iconY, 0.0F, 0.0F, HUD_ICON_SIZE, HUD_ICON_SIZE, HUD_ICON_SIZE, HUD_ICON_SIZE);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
     }
 
     private static ResourceLocation hudIconTexture() {
-        return switch (EmeraldPouchClientConfig.hudIconColor()) {
+        return switch (PouchClientSettings.hudIconColor()) {
             case EMERALD -> EMERALD_POUCH_HUD_TEXTURE;
             case BLACK -> BLACK_POUCH_HUD_TEXTURE;
             case BLUE -> BLUE_POUCH_HUD_TEXTURE;
@@ -444,23 +393,17 @@ public final class EmeraldPouchClient {
     }
 
     private static DisplayLayout computeInventoryLayout(Minecraft minecraft, AbstractContainerScreen<?> screen, String counterText) {
-        int iconX = screen.getGuiLeft() + screen.getXSize() - INVENTORY_ICON_RIGHT_MARGIN - HUD_ICON_SIZE;
-        int iconY = screen.getGuiTop() + INVENTORY_ICON_TOP_MARGIN;
+        int iconX = screenLeft(screen) + screenImageWidth(screen) - INVENTORY_ICON_RIGHT_MARGIN - HUD_ICON_SIZE;
+        int iconY = screenTop(screen) + INVENTORY_ICON_TOP_MARGIN;
         int textWidth = minecraft.font.width(counterText);
         int textX = iconX - TEXT_ICON_GAP - textWidth;
         int textY = iconY + (HUD_ICON_SIZE - minecraft.font.lineHeight) / 2 + INVENTORY_TEXT_Y_OFFSET;
         return new DisplayLayout(iconX, iconY, textX, textY, textWidth);
     }
 
-    private static DisplayLayout computeHudLayout(
-            Minecraft minecraft,
-            int guiWidth,
-            int guiHeight,
-            String counterText,
-            HumanoidArm mainArm
-    ) {
+    private static DisplayLayout computeHudLayout(Minecraft minecraft, int guiWidth, int guiHeight, String counterText, HumanoidArm mainArm) {
         int centerX = guiWidth / 2;
-        EmeraldPouchClientConfig.HudPosition hudPosition = EmeraldPouchClientConfig.hudPosition();
+        PouchClientSettings.HudPosition hudPosition = PouchClientSettings.hudPosition();
         boolean sideLeft = switch (hudPosition) {
             case POSITION_1 -> true;
             case POSITION_2 -> false;
@@ -483,14 +426,12 @@ public final class EmeraldPouchClient {
 
         int iconY = switch (hudPosition) {
             case POSITION_1 -> guiHeight - POSITION_1_Y_FROM_BOTTOM;
-            case POSITION_2 -> guiHeight - minecraft.gui.rightHeight + 10 + POSITION_2_Y_OFFSET;
+            case POSITION_2 -> guiHeight - guiRightHeight(minecraft) + 10 + POSITION_2_Y_OFFSET;
             case POSITION_3 -> guiHeight - POSITION_3_Y_FROM_BOTTOM;
         };
 
         int textWidth = minecraft.font.width(counterText);
-        int textX = sideLeft
-                ? iconX - TEXT_ICON_GAP - textWidth
-                : iconX + HUD_ICON_SIZE + TEXT_ICON_GAP;
+        int textX = sideLeft ? iconX - TEXT_ICON_GAP - textWidth : iconX + HUD_ICON_SIZE + TEXT_ICON_GAP;
         int textY = iconY + (HUD_ICON_SIZE - minecraft.font.lineHeight) / 2 + HUD_TEXT_Y_OFFSET;
         return new DisplayLayout(iconX, iconY, textX, textY, textWidth);
     }
@@ -536,6 +477,34 @@ public final class EmeraldPouchClient {
         }
     }
 
+    private static int screenLeft(AbstractContainerScreen<?> screen) {
+        try {
+            return ABSTRACT_CONTAINER_LEFT_POS_FIELD.getInt(screen);
+        } catch (IllegalAccessException exception) {
+            throw new IllegalStateException("Unable to read container screen left position", exception);
+        }
+    }
+
+    private static int screenTop(AbstractContainerScreen<?> screen) {
+        try {
+            return ABSTRACT_CONTAINER_TOP_POS_FIELD.getInt(screen);
+        } catch (IllegalAccessException exception) {
+            throw new IllegalStateException("Unable to read container screen top position", exception);
+        }
+    }
+
+    private static int screenImageWidth(AbstractContainerScreen<?> screen) {
+        try {
+            return ABSTRACT_CONTAINER_IMAGE_WIDTH_FIELD.getInt(screen);
+        } catch (IllegalAccessException exception) {
+            throw new IllegalStateException("Unable to read container screen width", exception);
+        }
+    }
+
+    private static int guiRightHeight(Minecraft minecraft) {
+        return readIntField(minecraft.gui, "rightHeight", "Unable to read HUD right height");
+    }
+
     private static Field findField(Class<?> type, String fieldName) {
         try {
             Field field = type.getDeclaredField(fieldName);
@@ -543,6 +512,16 @@ public final class EmeraldPouchClient {
             return field;
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + fieldName, exception);
+        }
+    }
+
+    private static int readIntField(Object target, String fieldName, String errorMessage) {
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.getInt(target);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException(errorMessage, exception);
         }
     }
 
