@@ -1,5 +1,7 @@
-package com.jvn.emeraldpouch.compat;
+package com.jvn.emeraldpouch.compat.neoforge;
 
+import com.jvn.emeraldpouch.neoforge.compat.AccessoriesCompat;
+import com.jvn.emeraldpouch.neoforge.compat.CuriosCompat;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

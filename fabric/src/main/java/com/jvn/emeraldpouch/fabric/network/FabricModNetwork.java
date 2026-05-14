@@ -24,9 +24,9 @@ public final class FabricModNetwork {
         ServerPlayNetworking.registerGlobalReceiver(MerchantTradeClickPayload.TYPE, (payload, context) ->
                 context.server().execute(() -> {
                     switch (payload.clickType()) {
-                        case SELECTION -> MerchantTradeHandler.onTradeSelectionClick(context.player());
-                        case RESULT -> MerchantTradeHandler.onTradeResultClick(context.player(), false);
-                        case SHIFT_RESULT -> MerchantTradeHandler.onTradeResultClick(context.player(), true);
+                        case SELECTION -> MerchantTradeHandler.onTradeSelectionClick(context.player(), payload.offerIndex());
+                        case RESULT -> MerchantTradeHandler.onTradeResultClick(context.player(), false, payload.offerIndex());
+                        case SHIFT_RESULT -> MerchantTradeHandler.onTradeResultClick(context.player(), true, payload.offerIndex());
                     }
                 })
         );

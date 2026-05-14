@@ -1,4 +1,4 @@
-package com.jvn.emeraldpouch.event;
+package com.jvn.emeraldpouch.neoforge.event;
 
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;

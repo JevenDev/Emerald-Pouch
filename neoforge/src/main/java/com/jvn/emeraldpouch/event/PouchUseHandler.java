@@ -1,7 +1,7 @@
-package com.jvn.emeraldpouch.event;
+package com.jvn.emeraldpouch.neoforge.event;
 
-import com.jvn.emeraldpouch.compat.AccessoriesCompat;
-import com.jvn.emeraldpouch.compat.CuriosCompat;
+import com.jvn.emeraldpouch.neoforge.compat.AccessoriesCompat;
+import com.jvn.emeraldpouch.neoforge.compat.CuriosCompat;
 import com.jvn.emeraldpouch.compat.ModCompat;
 import com.jvn.emeraldpouch.pouch.PouchData;
 import com.jvn.emeraldpouch.pouch.PouchMenuOpener;

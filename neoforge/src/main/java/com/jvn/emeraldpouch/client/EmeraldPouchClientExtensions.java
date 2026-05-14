@@ -1,4 +1,4 @@
-package com.jvn.emeraldpouch.client;
+package com.jvn.emeraldpouch.neoforge.client;
 
 import com.jvn.toucanlib.neoforge.config.ToucanConfigScreens;
 import java.util.function.BiFunction;

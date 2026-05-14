@@ -1,5 +1,6 @@
-package com.jvn.emeraldpouch.client;
+package com.jvn.emeraldpouch.client.neoforge;
 
+import com.jvn.emeraldpouch.client.PouchClientSettings;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 
 public final class PouchClientSettingsImpl {

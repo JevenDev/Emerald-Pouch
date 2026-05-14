@@ -1,6 +1,8 @@
-package com.jvn.emeraldpouch.network;
+package com.jvn.emeraldpouch.neoforge.network;
 
 import com.jvn.emeraldpouch.event.MerchantTradeHandler;
+import com.jvn.emeraldpouch.network.MerchantTradeClickPayload;
+import com.jvn.emeraldpouch.network.OpenFirstPouchPayload;
 import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
 import com.jvn.emeraldpouch.pouch.PouchMenuOpener;
 import com.jvn.toucanlib.neoforge.network.ToucanNetwork;
@@ -37,9 +39,9 @@ public final class ModNetwork {
     private static void handleMerchantTradeClick(MerchantTradeClickPayload payload, IPayloadContext context) {
         ToucanNetwork.enqueue(context, () -> ToucanNetwork.withServerPlayer(context, serverPlayer -> {
             switch (payload.clickType()) {
-                case SELECTION -> MerchantTradeHandler.onTradeSelectionClick(serverPlayer);
-                case RESULT -> MerchantTradeHandler.onTradeResultClick(serverPlayer, false);
-                case SHIFT_RESULT -> MerchantTradeHandler.onTradeResultClick(serverPlayer, true);
+                case SELECTION -> MerchantTradeHandler.onTradeSelectionClick(serverPlayer, payload.offerIndex());
+                case RESULT -> MerchantTradeHandler.onTradeResultClick(serverPlayer, false, payload.offerIndex());
+                case SHIFT_RESULT -> MerchantTradeHandler.onTradeResultClick(serverPlayer, true, payload.offerIndex());
             }
         }));
     }
