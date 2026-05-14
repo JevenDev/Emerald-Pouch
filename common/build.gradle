@@ -1,0 +1,27 @@
+ext.set("loom.platform", "fabric")
+apply plugin: "dev.architectury.loom"
+
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+sourceSets.main.resources {
+    srcDir("src/generated/resources")
+    exclude("**/*.bbmodel")
+    exclude("**/.cache/**")
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    modImplementation "com.jvn.toucanlib:toucanlib:${rootProject.toucanlib_version}"
+}
+
+publishing {
+    publications {
+        mavenCommon(MavenPublication) {
+            artifactId = rootProject.mod_id
+            from components.java
+        }
+    }
+}

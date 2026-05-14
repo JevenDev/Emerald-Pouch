@@ -1,0 +1,93 @@
+plugins {
+    id "com.gradleup.shadow"
+}
+
+ext.set("loom.platform", "neoforge")
+apply plugin: "dev.architectury.loom"
+
+base {
+    archivesName = "${rootProject.mod_id}-${project.name}-${rootProject.minecraft_version}"
+}
+
+architectury {
+    platformSetupLoomIde()
+    neoForge()
+}
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentNeoForge.extendsFrom common
+}
+
+dependencies {
+    neoForge "net.neoforged:neoforge:${rootProject.neo_version}"
+    modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_version}"
+    modImplementation "com.jvn.toucanlib:toucanlib-neoforge-${rootProject.minecraft_version}:${rootProject.toucanlib_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
+}
+
+processResources {
+    inputs.property "minecraft_version", rootProject.minecraft_version
+    inputs.property "minecraft_version_range", rootProject.minecraft_version_range
+    inputs.property "neo_version", rootProject.neo_version
+    inputs.property "loader_version_range", rootProject.loader_version_range
+    inputs.property "mod_id", rootProject.mod_id
+    inputs.property "mod_name", rootProject.mod_name
+    inputs.property "mod_authors", rootProject.mod_authors
+    inputs.property "mod_display_url", rootProject.mod_display_url
+    inputs.property "mod_issue_tracker", rootProject.mod_issue_tracker
+    inputs.property "mod_description", rootProject.mod_description
+    inputs.property "mod_license", rootProject.mod_license
+    inputs.property "mod_version", project.version
+    inputs.property "architectury_version", rootProject.architectury_version
+    inputs.property "toucanlib_version", rootProject.toucanlib_version
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand(
+                minecraft_version: rootProject.minecraft_version,
+                minecraft_version_range: rootProject.minecraft_version_range,
+                neo_version: rootProject.neo_version,
+                loader_version_range: rootProject.loader_version_range,
+                mod_id: rootProject.mod_id,
+                mod_name: rootProject.mod_name,
+                mod_authors: rootProject.mod_authors,
+                mod_display_url: rootProject.mod_display_url,
+                mod_issue_tracker: rootProject.mod_issue_tracker,
+                mod_description: rootProject.mod_description,
+                mod_license: rootProject.mod_license,
+                mod_version: project.version,
+                architectury_version: rootProject.architectury_version,
+                toucanlib_version: rootProject.toucanlib_version
+        )
+    }
+}
+
+shadowJar {
+    exclude "architectury.common.json"
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+remapJar {
+    inputFile.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
+sourcesJar {
+    dependsOn project(":common").sourcesJar
+    from project(":common").sourcesJar.archiveFile.map { zipTree(it) }
+}
+
+publishing {
+    publications {
+        mavenNeoForge(MavenPublication) {
+            artifactId = base.archivesName.get()
+            from components.java
+        }
+    }
+}
