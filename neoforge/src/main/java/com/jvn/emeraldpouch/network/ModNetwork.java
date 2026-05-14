@@ -36,10 +36,10 @@ public final class ModNetwork {
 
     private static void handleMerchantTradeClick(MerchantTradeClickPayload payload, IPayloadContext context) {
         ToucanNetwork.enqueue(context, () -> ToucanNetwork.withServerPlayer(context, serverPlayer -> {
-            if (payload.shiftResultClick()) {
-                MerchantTradeHandler.onShiftTradeResultClick(serverPlayer);
-            } else {
-                MerchantTradeHandler.onTradeSelectionClick(serverPlayer);
+            switch (payload.clickType()) {
+                case SELECTION -> MerchantTradeHandler.onTradeSelectionClick(serverPlayer);
+                case RESULT -> MerchantTradeHandler.onTradeResultClick(serverPlayer, false);
+                case SHIFT_RESULT -> MerchantTradeHandler.onTradeResultClick(serverPlayer, true);
             }
         }));
     }

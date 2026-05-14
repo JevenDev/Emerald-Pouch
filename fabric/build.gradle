@@ -1,0 +1,93 @@
+plugins {
+    id "com.gradleup.shadow"
+}
+
+ext.set("loom.platform", "fabric")
+apply plugin: "dev.architectury.loom"
+
+base {
+    archivesName = "${rootProject.mod_id}-${project.name}-${rootProject.minecraft_version}"
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
+    modImplementation "com.jvn.toucanlib:toucanlib-fabric-${rootProject.minecraft_version}:${rootProject.toucanlib_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }
+}
+
+processResources {
+    inputs.property "mod_id", rootProject.mod_id
+    inputs.property "mod_name", rootProject.mod_name
+    inputs.property "mod_authors", rootProject.mod_authors
+    inputs.property "mod_description", rootProject.mod_description
+    inputs.property "mod_display_url", rootProject.mod_display_url
+    inputs.property "mod_issue_tracker", rootProject.mod_issue_tracker
+    inputs.property "mod_license", rootProject.mod_license
+    inputs.property "mod_version", project.version
+    inputs.property "minecraft_version", rootProject.minecraft_version
+    inputs.property "fabric_loader_version", rootProject.fabric_loader_version
+    inputs.property "fabric_api_version", rootProject.fabric_api_version
+    inputs.property "architectury_version", rootProject.architectury_version
+    inputs.property "toucanlib_version", rootProject.toucanlib_version
+
+    filesMatching("fabric.mod.json") {
+        expand(
+                mod_id: rootProject.mod_id,
+                mod_name: rootProject.mod_name,
+                mod_authors: rootProject.mod_authors,
+                mod_description: rootProject.mod_description,
+                mod_display_url: rootProject.mod_display_url,
+                mod_issue_tracker: rootProject.mod_issue_tracker,
+                mod_license: rootProject.mod_license,
+                mod_version: project.version,
+                minecraft_version: rootProject.minecraft_version,
+                fabric_loader_version: rootProject.fabric_loader_version,
+                fabric_api_version: rootProject.fabric_api_version,
+                architectury_version: rootProject.architectury_version,
+                toucanlib_version: rootProject.toucanlib_version
+        )
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+remapJar {
+    inputFile.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
+sourcesJar {
+    dependsOn project(":common").sourcesJar
+    from project(":common").sourcesJar.archiveFile.map { zipTree(it) }
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = base.archivesName.get()
+            from components.java
+        }
+    }
+}

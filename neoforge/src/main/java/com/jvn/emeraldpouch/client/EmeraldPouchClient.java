@@ -82,6 +82,7 @@ public final class EmeraldPouchClient {
     private static final int SLOT_SIZE = 16;
     private static final Field MERCHANT_SCROLL_OFFSET_FIELD = findField(MerchantScreen.class, "scrollOff");
     private static boolean showPouchText = true;
+    private static boolean merchantResultClicked = false;
     private static boolean shiftClickedMerchantResult = false;
 
     private EmeraldPouchClient() {
@@ -179,6 +180,7 @@ public final class EmeraldPouchClient {
     }
 
     public static void onScreenMouseButtonPressedPre(ScreenEvent.MouseButtonPressed.Pre event) {
+        merchantResultClicked = false;
         shiftClickedMerchantResult = false;
 
         if (event.getButton() != InputConstants.MOUSE_BUTTON_LEFT) {
@@ -192,7 +194,16 @@ public final class EmeraldPouchClient {
             if (rx >= MERCHANT_RESULT_SLOT_X && rx < MERCHANT_RESULT_SLOT_X + SLOT_SIZE
                     && ry >= MERCHANT_RESULT_SLOT_Y && ry < MERCHANT_RESULT_SLOT_Y + SLOT_SIZE
                     && merchantScreen.getMenu().getSlot(2).hasItem()) {
+                merchantResultClicked = true;
                 shiftClickedMerchantResult = true;
+            }
+        } else if (event.getScreen() instanceof MerchantScreen merchantScreen) {
+            int rx = (int) event.getMouseX() - merchantScreen.getGuiLeft();
+            int ry = (int) event.getMouseY() - merchantScreen.getGuiTop();
+            if (rx >= MERCHANT_RESULT_SLOT_X && rx < MERCHANT_RESULT_SLOT_X + SLOT_SIZE
+                    && ry >= MERCHANT_RESULT_SLOT_Y && ry < MERCHANT_RESULT_SLOT_Y + SLOT_SIZE
+                    && merchantScreen.getMenu().getSlot(2).hasItem()) {
+                merchantResultClicked = true;
             }
         }
 
@@ -230,9 +241,14 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        if (shiftClickedMerchantResult) {
+        if (merchantResultClicked) {
+            merchantResultClicked = false;
+            PacketDistributor.sendToServer(new MerchantTradeClickPayload(
+                    shiftClickedMerchantResult
+                            ? MerchantTradeClickPayload.ClickType.SHIFT_RESULT
+                            : MerchantTradeClickPayload.ClickType.RESULT
+            ));
             shiftClickedMerchantResult = false;
-            PacketDistributor.sendToServer(new MerchantTradeClickPayload(true));
             return;
         }
 
@@ -253,7 +269,7 @@ public final class EmeraldPouchClient {
             return;
         }
 
-        PacketDistributor.sendToServer(new MerchantTradeClickPayload(false));
+        PacketDistributor.sendToServer(new MerchantTradeClickPayload(MerchantTradeClickPayload.ClickType.SELECTION));
     }
 
     public static void onMouseButtonInputPre(InputEvent.MouseButton.Pre event) {

@@ -2,8 +2,6 @@ package com.jvn.emeraldpouch.neoforge;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.event.AutoPickupHandler;
-import com.jvn.emeraldpouch.event.MerchantTradeHandler;
-import com.jvn.emeraldpouch.event.PouchUseHandler;
 import com.jvn.emeraldpouch.network.ModNetwork;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import net.neoforged.bus.api.EventPriority;
@@ -21,10 +19,6 @@ public final class EmeraldPouchNeoForge {
         EmeraldPouchMod.init();
         modEventBus.addListener(ModNetwork::registerPayloadHandlers);
         NeoForge.EVENT_BUS.addListener(AutoPickupHandler::onItemEntityPickupPost);
-        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onContainerOpened);
-        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onContainerClosed);
-        NeoForge.EVENT_BUS.addListener(MerchantTradeHandler::onTradeWithVillager);
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, PouchUseHandler::onRightClickItem);
         modContainer.registerConfig(ModConfig.Type.CLIENT, EmeraldPouchClientConfig.SPEC);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             com.jvn.emeraldpouch.client.EmeraldPouchClientExtensions.registerConfigScreen(modContainer);
