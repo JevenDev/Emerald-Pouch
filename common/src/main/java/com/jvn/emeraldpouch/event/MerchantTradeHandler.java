@@ -51,7 +51,7 @@ public final class MerchantTradeHandler {
         });
     }
 
-    public static void onTradeSelectionClick(ServerPlayer player) {
+    public static void onTradeSelectionClick(ServerPlayer player, int offerIndex) {
         if (!(player.containerMenu instanceof MerchantMenu merchantMenu)) {
             return;
         }
@@ -68,7 +68,7 @@ public final class MerchantTradeHandler {
 
         MerchantContainer tradeContainer = getTradeContainer(merchantMenu);
         int selectionHint = getSelectionHint(tradeContainer);
-        if (selectionHint < 0 || selectionHint >= merchantMenu.getOffers().size()) {
+        if (selectionHint < 0 || selectionHint >= merchantMenu.getOffers().size() || selectionHint != offerIndex) {
             return;
         }
 
@@ -86,7 +86,7 @@ public final class MerchantTradeHandler {
         }
     }
 
-    public static void onTradeResultClick(ServerPlayer player, boolean shiftResultClick) {
+    public static void onTradeResultClick(ServerPlayer player, boolean shiftResultClick, int offerIndex) {
         if (!(player.containerMenu instanceof MerchantMenu merchantMenu)) {
             return;
         }
@@ -102,7 +102,7 @@ public final class MerchantTradeHandler {
         );
 
         int selectionHint = getSelectionHint(getTradeContainer(merchantMenu));
-        if (selectionHint < 0 || selectionHint >= merchantMenu.getOffers().size()) {
+        if (selectionHint < 0 || selectionHint >= merchantMenu.getOffers().size() || selectionHint != offerIndex) {
             return;
         }
 
@@ -124,7 +124,7 @@ public final class MerchantTradeHandler {
         }
 
         merchantMenu.tryMoveItems(selectionHint);
-        onTradeSelectionClick(player);
+        onTradeSelectionClick(player, selectionHint);
         merchantMenu.broadcastChanges();
     }
 

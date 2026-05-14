@@ -1,5 +1,6 @@
-package com.jvn.emeraldpouch.compat;
+package com.jvn.emeraldpouch.neoforge.compat;
 
+import com.jvn.emeraldpouch.compat.ModCompat;
 import com.jvn.toucanlib.util.ToucanResourceLocations;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;

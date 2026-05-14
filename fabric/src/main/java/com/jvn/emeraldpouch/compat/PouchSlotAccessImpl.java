@@ -1,5 +1,6 @@
-package com.jvn.emeraldpouch.compat;
+package com.jvn.emeraldpouch.compat.fabric;
 
+import com.jvn.emeraldpouch.compat.ModCompat;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
