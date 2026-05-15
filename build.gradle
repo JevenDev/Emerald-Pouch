@@ -39,14 +39,11 @@ allprojects {
     }
 
     repositories {
-        exclusiveContent {
-            forRepository {
-                maven {
-                    url = uri("https://cursemaven.com")
-                }
-            }
-            filter {
-                includeGroup "curse.maven"
+        maven {
+            name = "CurseForge"
+            url = uri("https://minecraft.curseforge.com/api/maven/")
+            metadataSources {
+                artifact()
             }
         }
         mavenLocal()
