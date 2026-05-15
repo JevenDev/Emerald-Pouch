@@ -32,7 +32,6 @@ public final class EmeraldPouchFabricClient implements ClientModInitializer {
                         ItemProperties.register(item.get(), openedPropertyId, PouchClientRuntime::openedProperty);
                 }
         ClientTickEvent.CLIENT_POST.register(PouchClientRuntime::onClientTick);
-        ClientGuiEvent.RENDER_HUD.register((guiGraphics, deltaTracker) -> PouchClientRuntime.onRenderHud(Minecraft.getInstance(), guiGraphics));
         ClientGuiEvent.RENDER_POST.register((screen, guiGraphics, mouseX, mouseY, deltaTracker) ->
                 PouchClientRuntime.onScreenRenderPost(Minecraft.getInstance(), screen, guiGraphics, mouseX, mouseY)
         );

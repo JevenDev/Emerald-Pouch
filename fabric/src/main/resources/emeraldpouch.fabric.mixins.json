@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.jvn.emeraldpouch.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "client.GuiMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
