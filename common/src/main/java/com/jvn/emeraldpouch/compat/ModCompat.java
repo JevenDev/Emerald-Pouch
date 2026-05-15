@@ -7,6 +7,7 @@ public final class ModCompat {
         Platform.isModLoaded("shulkerboxtooltip") || Platform.isModLoaded("shulker_box_tooltip");
     private static final boolean CURIOS_LOADED = Platform.isModLoaded("curios");
     private static final boolean ACCESSORIES_LOADED = Platform.isModLoaded("accessories");
+    private static final boolean TRINKETS_LOADED = Platform.isModLoaded("trinkets");
 
     private ModCompat() {
     }
@@ -23,7 +24,11 @@ public final class ModCompat {
         return ACCESSORIES_LOADED;
     }
 
+    public static boolean isTrinketsLoaded() {
+        return TRINKETS_LOADED;
+    }
+
     public static boolean hasSlotCompatLoaded() {
-        return CURIOS_LOADED || ACCESSORIES_LOADED;
+        return CURIOS_LOADED || ACCESSORIES_LOADED || TRINKETS_LOADED;
     }
 }

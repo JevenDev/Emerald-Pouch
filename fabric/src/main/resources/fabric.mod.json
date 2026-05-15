@@ -21,6 +21,9 @@
     ],
     "client": [
       "com.jvn.emeraldpouch.fabric.client.EmeraldPouchFabricClient"
+    ],
+    "modmenu": [
+      "com.jvn.emeraldpouch.fabric.client.EmeraldPouchModMenu"
     ]
   },
   "mixins": [

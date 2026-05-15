@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch.compat.fabric;
 
 import com.jvn.emeraldpouch.compat.ModCompat;
+import com.jvn.emeraldpouch.fabric.compat.TrinketsCompat;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -43,57 +44,55 @@ public final class PouchSlotAccessImpl {
     }
 
     public static int getCuriosSlotCount(Player player) {
-        return 0;
+        return TrinketsCompat.getBeltSlotCount(player);
     }
 
     public static ItemStack getCuriosStack(Player player, int slot) {
-        return ItemStack.EMPTY;
+        return TrinketsCompat.getBeltStackInSlot(player, slot);
     }
 
     public static void setCuriosStack(Player player, int slot, ItemStack stack) {
+        TrinketsCompat.setBeltStackInSlot(player, slot, stack);
     }
 
     public static boolean tryEquipFromHand(Player player, InteractionHand hand) {
         Object capability = getAccessoriesCapability(player);
-        if (capability == null) {
-            return false;
-        }
-
-        ItemStack handStack = player.getItemInHand(hand);
-        if (handStack.isEmpty()) {
-            return false;
-        }
-
-        try {
-            Method attemptEquipMethod = capability.getClass().getMethod("attemptToEquipAccessory", ItemStack.class, boolean.class);
-            ItemStack newHandStack = handStack.copy();
-            Object pair = attemptEquipMethod.invoke(capability, newHandStack, true);
-            if (pair == null) {
+        if (capability != null) {
+            ItemStack handStack = player.getItemInHand(hand);
+            if (handStack.isEmpty()) {
                 return false;
             }
 
-            Optional<ItemStack> swappedStack = extractPairSecondItemStackOptional(pair);
-            if (swappedStack == null) {
-                return false;
-            }
+            try {
+                Method attemptEquipMethod = capability.getClass().getMethod("attemptToEquipAccessory", ItemStack.class, boolean.class);
+                ItemStack newHandStack = handStack.copy();
+                Object pair = attemptEquipMethod.invoke(capability, newHandStack, true);
+                if (pair != null) {
+                    Optional<ItemStack> swappedStack = extractPairSecondItemStackOptional(pair);
+                    if (swappedStack == null) {
+                        return false;
+                    }
 
-            if (swappedStack.isPresent()) {
-                ItemStack swapped = swappedStack.get();
-                if (newHandStack.isEmpty()) {
-                    newHandStack = swapped;
-                } else if (ItemStack.isSameItemSameComponents(newHandStack, swapped)
-                        && (newHandStack.getCount() + swapped.getCount()) <= newHandStack.getMaxStackSize()) {
-                    newHandStack.grow(swapped.getCount());
-                } else {
-                    player.getInventory().placeItemBackInInventory(swapped);
+                    if (swappedStack.isPresent()) {
+                        ItemStack swapped = swappedStack.get();
+                        if (newHandStack.isEmpty()) {
+                            newHandStack = swapped;
+                        } else if (ItemStack.isSameItemSameComponents(newHandStack, swapped)
+                                && (newHandStack.getCount() + swapped.getCount()) <= newHandStack.getMaxStackSize()) {
+                            newHandStack.grow(swapped.getCount());
+                        } else {
+                            player.getInventory().placeItemBackInInventory(swapped);
+                        }
+                    }
+
+                    player.setItemInHand(hand, newHandStack);
+                    return true;
                 }
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
             }
-
-            player.setItemInHand(hand, newHandStack);
-            return true;
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-            return false;
         }
+
+        return TrinketsCompat.tryEquipFromHand(player, hand);
     }
 
     private static Container getAccessoriesBeltContainer(LivingEntity entity) {

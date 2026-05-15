@@ -70,12 +70,12 @@ public final class PouchClientRuntime {
     private static final int MERCHANT_RESULT_SLOT_X = 220;
     private static final int MERCHANT_RESULT_SLOT_Y = 37;
     private static final int SLOT_SIZE = 16;
-    private static final Field ABSTRACT_CONTAINER_LEFT_POS_FIELD = findField(AbstractContainerScreen.class, "leftPos");
-    private static final Field ABSTRACT_CONTAINER_TOP_POS_FIELD = findField(AbstractContainerScreen.class, "topPos");
-    private static final Field ABSTRACT_CONTAINER_IMAGE_WIDTH_FIELD = findField(AbstractContainerScreen.class, "imageWidth");
-    private static final Field MERCHANT_TRADE_CONTAINER_FIELD = findField(MerchantMenu.class, "tradeContainer");
-    private static final Field MERCHANT_SCROLL_OFFSET_FIELD = findField(MerchantScreen.class, "scrollOff");
-    private static final Field MERCHANT_SELECTION_HINT_FIELD = findField(MerchantContainer.class, "selectionHint");
+    private static final Field ABSTRACT_CONTAINER_LEFT_POS_FIELD = findField(AbstractContainerScreen.class, "leftPos", "field_2776", "A");
+    private static final Field ABSTRACT_CONTAINER_TOP_POS_FIELD = findField(AbstractContainerScreen.class, "topPos", "field_2800", "B");
+    private static final Field ABSTRACT_CONTAINER_IMAGE_WIDTH_FIELD = findField(AbstractContainerScreen.class, "imageWidth", "field_2792", "c");
+    private static final Field MERCHANT_TRADE_CONTAINER_FIELD = findField(MerchantMenu.class, "tradeContainer", "field_7861", "w");
+    private static final Field MERCHANT_SCROLL_OFFSET_FIELD = findField(MerchantScreen.class, "scrollOff", "field_19163", "ak");
+    private static final Field MERCHANT_SELECTION_HINT_FIELD = findField(MerchantContainer.class, "selectionHint", "field_7842", "e");
     private static boolean showPouchText = true;
     private static boolean merchantResultClicked;
     private static boolean shiftClickedMerchantResult;
@@ -491,26 +491,32 @@ public final class PouchClientRuntime {
     }
 
     private static int guiRightHeight(Minecraft minecraft) {
-        return readIntField(minecraft.gui, "rightHeight", "Unable to read HUD right height");
+        return readIntFieldOrDefault(minecraft.gui, 39, "rightHeight");
     }
 
-    private static Field findField(Class<?> type, String fieldName) {
-        try {
-            Field field = type.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field;
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + fieldName, exception);
+    private static Field findField(Class<?> type, String... fieldNames) {
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            for (String fieldName : fieldNames) {
+                try {
+                    Field field = current.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    return field;
+                } catch (NoSuchFieldException ignored) {
+                }
+            }
         }
+
+        throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + String.join("/", fieldNames));
     }
 
-    private static int readIntField(Object target, String fieldName, String errorMessage) {
+    private static int readIntFieldOrDefault(Object target, int defaultValue, String... fieldNames) {
         try {
-            Field field = target.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
+            Field field = findField(target.getClass(), fieldNames);
             return field.getInt(target);
         } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException(errorMessage, exception);
+            return defaultValue;
+        } catch (IllegalStateException exception) {
+            return defaultValue;
         }
     }
 

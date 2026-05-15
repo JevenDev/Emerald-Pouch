@@ -16,8 +16,8 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import com.jvn.emeraldpouch.pouch.PouchInventoryAccess;
 
 public final class MerchantTradeHandler {
-    private static final Field TRADE_CONTAINER_FIELD = findField(MerchantMenu.class, "tradeContainer");
-    private static final Field SELECTION_HINT_FIELD = findField(MerchantContainer.class, "selectionHint");
+    private static final Field TRADE_CONTAINER_FIELD = findField(MerchantMenu.class, "tradeContainer", "field_7861", "w");
+    private static final Field SELECTION_HINT_FIELD = findField(MerchantContainer.class, "selectionHint", "field_7842", "e");
     private static final Map<UUID, TradeSession> ACTIVE_TRADE_SESSIONS = new HashMap<>();
 
     private MerchantTradeHandler() {
@@ -202,14 +202,19 @@ public final class MerchantTradeHandler {
         }
     }
 
-    private static Field findField(Class<?> type, String fieldName) {
-        try {
-            Field field = type.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field;
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + fieldName, exception);
+    private static Field findField(Class<?> type, String... fieldNames) {
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            for (String fieldName : fieldNames) {
+                try {
+                    Field field = current.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    return field;
+                } catch (NoSuchFieldException ignored) {
+                }
+            }
         }
+
+        throw new IllegalStateException("Unable to resolve field " + type.getSimpleName() + "." + String.join("/", fieldNames));
     }
 
     private static final class TradeSession {
