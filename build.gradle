@@ -39,7 +39,16 @@ allprojects {
     }
 
     repositories {
-        maven { url = uri("${rootProject.projectDir}/../toucanLib/repo") }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url = uri("https://cursemaven.com")
+                }
+            }
+            filter {
+                includeGroup "curse.maven"
+            }
+        }
         mavenLocal()
         mavenCentral()
         maven { url = uri("https://maven.architectury.dev/") }
