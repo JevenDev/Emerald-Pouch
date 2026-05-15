@@ -52,6 +52,19 @@ public final class EmeraldPouchFabricClientConfig {
         return data.hudIconColor;
     }
 
+    public static void apply(
+            PouchClientSettings.HudPosition hudPosition,
+            boolean showBundleCountOverlay,
+            PouchClientSettings.HudIconColor hudIconColor
+    ) {
+        ClientConfigData updated = new ClientConfigData();
+        updated.hudPosition = hudPosition;
+        updated.showBundleCountOverlay = showBundleCountOverlay;
+        updated.hudIconColor = hudIconColor;
+        data = sanitize(updated);
+        save();
+    }
+
     private static void save() {
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
