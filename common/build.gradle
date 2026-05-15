@@ -14,7 +14,7 @@ sourceSets.main.resources {
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "dev.architectury:architectury:${rootProject.architectury_version}"
-    modCompileOnly "toucanlib:toucanlib-fabric:${rootProject.minecraft_version}:${rootProject.toucanlib_version}"
+    modCompileOnly rootProject.toucanlib_curse_maven_coordinate
 }
 
 publishing {

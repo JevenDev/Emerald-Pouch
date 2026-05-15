@@ -28,7 +28,7 @@ dependencies {
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
     modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
     modCompileOnly "dev.emi:trinkets:${rootProject.trinkets_version}"
-    modImplementation "toucanlib:toucanlib-fabric:${rootProject.minecraft_version}:${rootProject.toucanlib_version}"
+    modImplementation rootProject.toucanlib_curse_maven_coordinate
 
     common(project(path: ":common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }

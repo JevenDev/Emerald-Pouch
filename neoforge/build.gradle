@@ -25,7 +25,7 @@ configurations {
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neo_version}"
     modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_version}"
-    modImplementation "toucanlib:toucanlib-neoforge:${rootProject.minecraft_version}:${rootProject.toucanlib_version}"
+    modImplementation rootProject.toucanlib_curse_maven_coordinate
 
     common(project(path: ":common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
