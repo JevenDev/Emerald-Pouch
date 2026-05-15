@@ -38,6 +38,11 @@ allprojects {
         archivesName = rootProject.mod_id
     }
 
+    def useLocalToucanLib = providers.gradleProperty("useLocalToucanLib")
+            .map { it.toBoolean() }
+            .orElse(false)
+            .get()
+
     repositories {
         maven {
             name = "CurseForge"
@@ -46,7 +51,16 @@ allprojects {
                 artifact()
             }
         }
-        mavenLocal()
+        if (useLocalToucanLib) {
+            mavenLocal()
+        }
+        maven {
+            name = "CurseMaven"
+            url = uri("https://cursemaven.com")
+            content {
+                includeGroup "curse.maven"
+            }
+        }
         mavenCentral()
         maven { url = uri("https://maven.architectury.dev/") }
         maven { url = uri("https://maven.fabricmc.net/") }
