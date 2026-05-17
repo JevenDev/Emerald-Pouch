@@ -28,7 +28,11 @@ dependencies {
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
     modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
     modCompileOnly "dev.emi:trinkets:${rootProject.trinkets_version}"
-    modImplementation rootProject.toucanlib_curse_maven_coordinate
+    if (rootProject.hasProperty("useLocalToucanLib") && rootProject.useLocalToucanLib.toBoolean()) {
+        modImplementation "com.jvn.toucanlib:toucanlib-fabric-${rootProject.minecraft_version}:${rootProject.toucanlib_version}"
+    } else {
+        modImplementation rootProject.toucanlib_modrinth_fabric_coordinate
+    }
 
     common(project(path: ":common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }

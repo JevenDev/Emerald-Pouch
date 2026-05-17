@@ -55,6 +55,13 @@ allprojects {
             mavenLocal()
         }
         maven {
+            name = "Modrinth"
+            url = uri("https://api.modrinth.com/maven")
+            content {
+                includeGroup "maven.modrinth"
+            }
+        }
+        maven {
             name = "CurseMaven"
             url = uri("https://cursemaven.com")
             content {
