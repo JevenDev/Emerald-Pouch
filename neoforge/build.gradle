@@ -25,7 +25,11 @@ configurations {
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neo_version}"
     modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_version}"
-    modImplementation rootProject.toucanlib_curse_maven_coordinate
+    if (rootProject.hasProperty("useLocalToucanLib") && rootProject.useLocalToucanLib.toBoolean()) {
+        modImplementation "com.jvn.toucanlib:toucanlib-neoforge-${rootProject.minecraft_version}:${rootProject.toucanlib_version}"
+    } else {
+        modImplementation rootProject.toucanlib_modrinth_neoforge_coordinate
+    }
 
     common(project(path: ":common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
