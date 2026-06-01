@@ -31,59 +31,58 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    group = rootProject.mod_group_id
+    group = rootProject.maven_group
     version = rootProject.mod_version
 
     base {
         archivesName = rootProject.mod_id
     }
 
-    def useLocalToucanLib = providers.gradleProperty("useLocalToucanLib")
-            .map { it.toBoolean() }
-            .orElse(false)
-            .get()
-
     repositories {
-        maven {
-            name = "CurseForge"
-            url = uri("https://minecraft.curseforge.com/api/maven/")
-            metadataSources {
-                artifact()
-            }
-        }
-        if (useLocalToucanLib) {
+        if (rootProject.useLocalToucanLib.toBoolean()) {
             mavenLocal()
         }
-        maven {
-            name = "Modrinth"
-            url = uri("https://api.modrinth.com/maven")
-            content {
-                includeGroup "maven.modrinth"
-            }
-        }
-        maven {
-            name = "CurseMaven"
-            url = uri("https://cursemaven.com")
-            content {
-                includeGroup "curse.maven"
-            }
-        }
+
         mavenCentral()
         maven { url = uri("https://maven.architectury.dev/") }
         maven { url = uri("https://maven.fabricmc.net/") }
         maven { url = uri("https://maven.terraformersmc.com/") }
         maven { url = uri("https://maven.ladysnake.org/releases") }
         maven { url = uri("https://maven.neoforged.net/releases/") }
+
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Modrinth"
+                    url = uri("https://api.modrinth.com/maven")
+                }
+            }
+            filter {
+                includeGroup "maven.modrinth"
+            }
+        }
+
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "CurseMaven"
+                    url = uri("https://cursemaven.com/")
+                }
+            }
+            filter {
+                includeGroup "curse.maven"
+            }
+        }
     }
 
     java {
-        toolchain.languageVersion = JavaLanguageVersion.of(21)
+        toolchain.languageVersion = JavaLanguageVersion.of(rootProject.java_version.toInteger())
         withSourcesJar()
     }
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = rootProject.java_version.toInteger()
     }
 
     publishing {
