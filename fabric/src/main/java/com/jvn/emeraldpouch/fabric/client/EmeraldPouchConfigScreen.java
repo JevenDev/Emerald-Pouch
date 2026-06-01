@@ -14,6 +14,8 @@ public final class EmeraldPouchConfigScreen extends Screen {
 
     private final Screen parent;
     private PouchClientSettings.HudPosition hudPosition;
+    private PouchClientSettings.InventoryPosition inventoryPosition;
+    private PouchClientSettings.MerchantPosition merchantPosition;
     private boolean showBundleCountOverlay;
     private PouchClientSettings.HudIconColor hudIconColor;
 
@@ -21,6 +23,8 @@ public final class EmeraldPouchConfigScreen extends Screen {
         super(Component.translatable("emeraldpouch.configuration.title", "Emerald Pouch"));
         this.parent = parent;
         this.hudPosition = EmeraldPouchFabricClientConfig.hudPosition();
+        this.inventoryPosition = EmeraldPouchFabricClientConfig.inventoryPosition();
+        this.merchantPosition = EmeraldPouchFabricClientConfig.merchantPosition();
         this.showBundleCountOverlay = EmeraldPouchFabricClientConfig.showBundleCountOverlay();
         this.hudIconColor = EmeraldPouchFabricClientConfig.hudIconColor();
     }
@@ -42,12 +46,22 @@ public final class EmeraldPouchConfigScreen extends Screen {
             button.setMessage(bundleCountMessage());
         }).bounds(left, top + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT).build());
 
+        this.addRenderableWidget(Button.builder(inventoryPositionMessage(), button -> {
+            this.inventoryPosition = cycle(this.inventoryPosition, PouchClientSettings.InventoryPosition.values());
+            button.setMessage(inventoryPositionMessage());
+        }).bounds(left, top + BUTTON_SPACING * 2, BUTTON_WIDTH, BUTTON_HEIGHT).build());
+
+        this.addRenderableWidget(Button.builder(merchantPositionMessage(), button -> {
+            this.merchantPosition = cycle(this.merchantPosition, PouchClientSettings.MerchantPosition.values());
+            button.setMessage(merchantPositionMessage());
+        }).bounds(left, top + BUTTON_SPACING * 3, BUTTON_WIDTH, BUTTON_HEIGHT).build());
+
         this.addRenderableWidget(Button.builder(hudIconColorMessage(), button -> {
             this.hudIconColor = cycle(this.hudIconColor, PouchClientSettings.HudIconColor.values());
             button.setMessage(hudIconColorMessage());
-        }).bounds(left, top + BUTTON_SPACING * 2, BUTTON_WIDTH, BUTTON_HEIGHT).build());
+        }).bounds(left, top + BUTTON_SPACING * 4, BUTTON_WIDTH, BUTTON_HEIGHT).build());
 
-        int footerY = top + BUTTON_SPACING * 4;
+        int footerY = top + BUTTON_SPACING * 6;
         int actionWidth = (BUTTON_WIDTH - 10) / 2;
         this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> saveAndClose())
                 .bounds(left, footerY, actionWidth, BUTTON_HEIGHT)
@@ -79,7 +93,13 @@ public final class EmeraldPouchConfigScreen extends Screen {
     }
 
     private void saveAndClose() {
-        EmeraldPouchFabricClientConfig.apply(this.hudPosition, this.showBundleCountOverlay, this.hudIconColor);
+        EmeraldPouchFabricClientConfig.apply(
+                this.hudPosition,
+                this.inventoryPosition,
+                this.merchantPosition,
+                this.showBundleCountOverlay,
+                this.hudIconColor
+        );
         onClose();
     }
 
@@ -97,6 +117,18 @@ public final class EmeraldPouchConfigScreen extends Screen {
                         : "tooltip.emeraldpouch.state.off"));
     }
 
+    private Component inventoryPositionMessage() {
+        return Component.translatable("emeraldpouch.configuration.inventory_position")
+                .append(": ")
+                .append(inventoryPositionLabel(this.inventoryPosition));
+    }
+
+    private Component merchantPositionMessage() {
+        return Component.translatable("emeraldpouch.configuration.merchant_position")
+                .append(": ")
+                .append(merchantPositionLabel(this.merchantPosition));
+    }
+
     private Component hudIconColorMessage() {
         return Component.translatable("emeraldpouch.configuration.hud_icon_color")
                 .append(": ")
@@ -108,6 +140,21 @@ public final class EmeraldPouchConfigScreen extends Screen {
             case POSITION_1 -> Component.translatable("emeraldpouch.configuration.hud_position.position_1");
             case POSITION_2 -> Component.translatable("emeraldpouch.configuration.hud_position.position_2");
             case POSITION_3 -> Component.translatable("emeraldpouch.configuration.hud_position.position_3");
+        };
+    }
+
+    private static Component inventoryPositionLabel(PouchClientSettings.InventoryPosition inventoryPosition) {
+        return switch (inventoryPosition) {
+            case POSITION_1 -> Component.translatable("emeraldpouch.configuration.inventory_position.position_1");
+            case POSITION_2 -> Component.translatable("emeraldpouch.configuration.inventory_position.position_2");
+            case POSITION_3 -> Component.translatable("emeraldpouch.configuration.inventory_position.position_3");
+        };
+    }
+
+    private static Component merchantPositionLabel(PouchClientSettings.MerchantPosition merchantPosition) {
+        return switch (merchantPosition) {
+            case POSITION_1 -> Component.translatable("emeraldpouch.configuration.merchant_position.position_1");
+            case POSITION_2 -> Component.translatable("emeraldpouch.configuration.merchant_position.position_2");
         };
     }
 

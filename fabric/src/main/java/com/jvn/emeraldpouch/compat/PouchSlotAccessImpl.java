@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,14 +45,23 @@ public final class PouchSlotAccessImpl {
     }
 
     public static int getCuriosSlotCount(Player player) {
+        if (!ModCompat.isTrinketsLoaded()) {
+            return 0;
+        }
         return TrinketsCompat.getBeltSlotCount(player);
     }
 
     public static ItemStack getCuriosStack(Player player, int slot) {
+        if (!ModCompat.isTrinketsLoaded()) {
+            return ItemStack.EMPTY;
+        }
         return TrinketsCompat.getBeltStackInSlot(player, slot);
     }
 
     public static void setCuriosStack(Player player, int slot, ItemStack stack) {
+        if (!ModCompat.isTrinketsLoaded()) {
+            return;
+        }
         TrinketsCompat.setBeltStackInSlot(player, slot, stack);
     }
 
@@ -86,10 +96,15 @@ public final class PouchSlotAccessImpl {
                     }
 
                     player.setItemInHand(hand, newHandStack);
+                    player.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F, 1.0F);
                     return true;
                 }
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
             }
+        }
+
+        if (!ModCompat.isTrinketsLoaded()) {
+            return false;
         }
 
         return TrinketsCompat.tryEquipFromHand(player, hand);

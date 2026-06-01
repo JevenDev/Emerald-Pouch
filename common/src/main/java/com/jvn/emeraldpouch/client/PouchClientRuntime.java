@@ -24,6 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MerchantContainer;
 import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public final class PouchClientRuntime {
@@ -58,6 +59,11 @@ public final class PouchClientRuntime {
     private static final int POSITION_3_Y_FROM_BOTTOM = 19;
     private static final int INVENTORY_ICON_RIGHT_MARGIN = 6;
     private static final int INVENTORY_ICON_TOP_MARGIN = 62;
+    private static final int MERCHANT_POSITION_1_ICON_RIGHT_MARGIN = 6;
+    private static final int MERCHANT_POSITION_1_ICON_TOP_MARGIN = 62;
+    private static final int PLAYER_INVENTORY_OFFHAND_SLOT = 40;
+    private static final int PLAYER_INVENTORY_HELMET_SLOT = 39;
+    private static final int SLOT_STRIDE = 18;
     private static final int HUD_TEXT_Y_OFFSET = 2;
     private static final int INVENTORY_TEXT_Y_OFFSET = 2;
     private static final int BUNDLE_OVERLAY_TEXT_X_OFFSET = 4;
@@ -132,9 +138,19 @@ public final class PouchClientRuntime {
         String counterText = displayData.compactEmeraldAmount();
         DisplayLayout layout = computeInventoryLayout(minecraft, containerScreen, counterText);
         boolean hoverIcon = isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
-        renderIconAndMaybeText(guiGraphics, minecraft, counterText, displayData.pouchCount(), layout, hudIconTexture(), hoverIcon);
+        boolean showInventoryText = shouldShowScreenText(containerScreen);
+        renderIconAndMaybeText(
+                guiGraphics,
+                minecraft,
+                counterText,
+                displayData.pouchCount(),
+                layout,
+                hudIconTexture(),
+                hoverIcon,
+                showInventoryText
+        );
 
-        boolean hoverText = showPouchText
+        boolean hoverText = showInventoryText
                 && isHovered(mouseX, mouseY, layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
         if (hoverIcon || hoverText) {
             guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), java.util.Optional.empty(), mouseX, mouseY);
@@ -180,7 +196,9 @@ public final class PouchClientRuntime {
             return true;
         }
 
-        togglePouchTextVisibility(minecraft);
+        if (canToggleScreenText(containerScreen)) {
+            togglePouchTextVisibility(minecraft);
+        }
         return false;
     }
 
@@ -290,7 +308,16 @@ public final class PouchClientRuntime {
         int mouseX = scaledMouseX(minecraft);
         int mouseY = scaledMouseY(minecraft);
         boolean hoverIcon = isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
-        renderIconAndMaybeText(guiGraphics, minecraft, counterText, pouchCount, layout, hudIconTexture(), hoverIcon);
+        renderIconAndMaybeText(
+                guiGraphics,
+                minecraft,
+                counterText,
+                pouchCount,
+                layout,
+                hudIconTexture(),
+                hoverIcon,
+                showPouchText
+        );
     }
 
     private static void renderIconAndMaybeText(
@@ -300,7 +327,8 @@ public final class PouchClientRuntime {
             int pouchCount,
             DisplayLayout layout,
             ResourceLocation baseTexture,
-            boolean hoverIcon
+            boolean hoverIcon,
+            boolean showText
     ) {
         guiGraphics.blit(baseTexture, layout.iconX(), layout.iconY(), 0.0F, 0.0F, HUD_ICON_SIZE, HUD_ICON_SIZE, HUD_ICON_SIZE, HUD_ICON_SIZE);
 
@@ -308,7 +336,7 @@ public final class PouchClientRuntime {
             drawHoverOverlay(guiGraphics, layout.iconX(), layout.iconY());
         }
 
-        if (showPouchText) {
+        if (showText) {
             drawXpStyleText(guiGraphics, minecraft, text, layout.textX(), layout.textY());
         }
 
@@ -373,8 +401,62 @@ public final class PouchClientRuntime {
     }
 
     private static DisplayLayout computeInventoryLayout(Minecraft minecraft, AbstractContainerScreen<?> screen, String counterText) {
+        if (screen instanceof InventoryScreen inventoryScreen) {
+            return computePlayerInventoryLayout(minecraft, inventoryScreen, counterText);
+        }
+
+        if (screen instanceof MerchantScreen merchantScreen) {
+            return computeMerchantLayout(minecraft, merchantScreen, counterText);
+        }
+
         int iconX = screenLeft(screen) + screenImageWidth(screen) - INVENTORY_ICON_RIGHT_MARGIN - HUD_ICON_SIZE;
         int iconY = screenTop(screen) + INVENTORY_ICON_TOP_MARGIN;
+        int textWidth = minecraft.font.width(counterText);
+        int textX = iconX - TEXT_ICON_GAP - textWidth;
+        int textY = iconY + (HUD_ICON_SIZE - minecraft.font.lineHeight) / 2 + INVENTORY_TEXT_Y_OFFSET;
+        return new DisplayLayout(iconX, iconY, textX, textY, textWidth);
+    }
+
+    private static DisplayLayout computeMerchantLayout(Minecraft minecraft, MerchantScreen screen, String counterText) {
+        int iconX = screenLeft(screen) + screenImageWidth(screen) - MERCHANT_POSITION_1_ICON_RIGHT_MARGIN - HUD_ICON_SIZE;
+        int iconY = screenTop(screen) + MERCHANT_POSITION_1_ICON_TOP_MARGIN;
+
+        if (PouchClientSettings.merchantPosition() == PouchClientSettings.MerchantPosition.POSITION_2) {
+            Slot resultSlot = screen.getMenu().getSlot(2);
+            int resultSlotRight = screenLeft(screen) + resultSlot.x + SLOT_SIZE;
+            int containerRight = screenLeft(screen) + screenImageWidth(screen);
+            int gapWidth = Math.max(0, containerRight - resultSlotRight);
+            iconX = resultSlotRight + Math.max(0, (gapWidth - HUD_ICON_SIZE) / 2);
+            iconY = screenTop(screen) + resultSlot.y;
+        }
+
+        int textWidth = minecraft.font.width(counterText);
+        int textX = iconX - TEXT_ICON_GAP - textWidth;
+        int textY = iconY + (HUD_ICON_SIZE - minecraft.font.lineHeight) / 2 + INVENTORY_TEXT_Y_OFFSET;
+        return new DisplayLayout(iconX, iconY, textX, textY, textWidth);
+    }
+
+    private static DisplayLayout computePlayerInventoryLayout(Minecraft minecraft, InventoryScreen screen, String counterText) {
+        int defaultIconX = screenLeft(screen) + screenImageWidth(screen) - INVENTORY_ICON_RIGHT_MARGIN - HUD_ICON_SIZE;
+        int defaultIconY = screenTop(screen) + INVENTORY_ICON_TOP_MARGIN;
+
+        int iconX = defaultIconX;
+        int iconY = defaultIconY;
+        PouchClientSettings.InventoryPosition inventoryPosition = PouchClientSettings.inventoryPosition();
+        if (inventoryPosition != PouchClientSettings.InventoryPosition.POSITION_1) {
+            Slot offhandSlot = findPlayerInventorySlot(screen, PLAYER_INVENTORY_OFFHAND_SLOT);
+            if (offhandSlot != null) {
+                iconX = screenLeft(screen) + offhandSlot.x;
+                iconY = screenTop(screen) + offhandSlot.y - SLOT_STRIDE;
+                if (inventoryPosition == PouchClientSettings.InventoryPosition.POSITION_3) {
+                    Slot helmetSlot = findPlayerInventorySlot(screen, PLAYER_INVENTORY_HELMET_SLOT);
+                    iconY = helmetSlot != null
+                            ? screenTop(screen) + helmetSlot.y
+                            : screenTop(screen) + offhandSlot.y - SLOT_STRIDE * 3;
+                }
+            }
+        }
+
         int textWidth = minecraft.font.width(counterText);
         int textX = iconX - TEXT_ICON_GAP - textWidth;
         int textY = iconY + (HUD_ICON_SIZE - minecraft.font.lineHeight) / 2 + INVENTORY_TEXT_Y_OFFSET;
@@ -419,6 +501,22 @@ public final class PouchClientRuntime {
     private static void togglePouchTextVisibility(Minecraft minecraft) {
         showPouchText = !showPouchText;
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    }
+
+    private static boolean canToggleScreenText(AbstractContainerScreen<?> screen) {
+        if (screen instanceof InventoryScreen) {
+            return PouchClientSettings.inventoryPosition() == PouchClientSettings.InventoryPosition.POSITION_1;
+        }
+
+        if (screen instanceof MerchantScreen) {
+            return PouchClientSettings.merchantPosition() == PouchClientSettings.MerchantPosition.POSITION_1;
+        }
+
+        return false;
+    }
+
+    private static boolean shouldShowScreenText(AbstractContainerScreen<?> screen) {
+        return showPouchText && canToggleScreenText(screen);
     }
 
     private static int scaledMouseX(Minecraft minecraft) {
@@ -492,6 +590,15 @@ public final class PouchClientRuntime {
 
     private static int guiRightHeight(Minecraft minecraft) {
         return readIntFieldOrDefault(minecraft.gui, 39, "rightHeight");
+    }
+
+    private static Slot findPlayerInventorySlot(InventoryScreen screen, int slotIndex) {
+        for (Slot slot : screen.getMenu().slots) {
+            if (slot.getContainerSlot() == slotIndex) {
+                return slot;
+            }
+        }
+        return null;
     }
 
     private static Field findField(Class<?> type, String... fieldNames) {

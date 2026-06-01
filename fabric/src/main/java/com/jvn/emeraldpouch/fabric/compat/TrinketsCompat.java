@@ -1,11 +1,15 @@
 package com.jvn.emeraldpouch.fabric.compat;
 
 import com.jvn.emeraldpouch.compat.ModCompat;
+import com.jvn.emeraldpouch.registry.ModItems;
+import dev.emi.trinkets.api.SlotReference;
+import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,8 +19,26 @@ import net.minecraft.world.item.ItemStack;
 public final class TrinketsCompat {
     private static final String BELT_GROUP = "legs";
     private static final String BELT_SLOT = "belt";
+    private static final Trinket POUCH_TRINKET_SOUND = new Trinket() {
+        @Override
+        public void onEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
+            if (!entity.level().isClientSide()) {
+                entity.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F, 1.0F);
+            }
+        }
+    };
 
     private TrinketsCompat() {
+    }
+
+    public static void registerEquipSoundCallbacks() {
+        if (!ModCompat.isTrinketsLoaded()) {
+            return;
+        }
+
+        for (var pouchItem : ModItems.allPouchItems()) {
+            TrinketsApi.registerTrinket(pouchItem.get(), POUCH_TRINKET_SOUND);
+        }
     }
 
     public static int getBeltSlotCount(LivingEntity entity) {
@@ -66,6 +88,7 @@ public final class TrinketsCompat {
                 beltInventory.markUpdate();
             }
             player.setItemInHand(hand, ItemStack.EMPTY);
+            player.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F, 1.0F);
             return true;
         }
 
@@ -79,6 +102,7 @@ public final class TrinketsCompat {
             beltInventory.markUpdate();
         }
         player.setItemInHand(hand, equippedStack.copy());
+        player.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F, 1.0F);
         return true;
     }
 

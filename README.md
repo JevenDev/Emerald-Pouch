@@ -25,7 +25,7 @@ The mod is designed to be simple, practical, and easy to drop into any pack.
 - **Store large amounts of emeralds** inside a dedicated pouch
 - Keep your inventory cleaner while still carrying your currency with you
 - **Open the first pouch in your inventory** with a keybind for quick access
-- **Right-click a pouch in hand** to open it directly
+- **Shift + Right-click a pouch in hand** to open it directly
 - Optionally **compact emeralds automatically** as they enter the pouch
 - When auto-pickup is enabled, emeralds will **prioritize filling the first pouch found**, then continue to the next one
 - **Trade directly with villagers** using emeralds stored inside your pouch(es)
@@ -57,7 +57,8 @@ Current functionality includes:
 
 - Dedicated emerald pouch items in multiple colour variants, with two different sizes
 - Custom pouch container screens
-- Right-click in either hand to open
+- Shift + right-click in either hand to open
+- Right-click can quickly equip to a supported belt/accessory slot
 - Inventory keybind access with `N` by default
 - Automatic emerald intake toggle
 - Optional instant compaction toggle
@@ -101,9 +102,10 @@ When choosing where emeralds are pulled from, Emerald Pouch prioritizes **equipp
 ## Controls
 
 - **Right-click with pouch in hand**
-  - Opens that pouch directly
+  - Equips/swaps it into a supported belt/accessory slot if Accessories, Curios, or Trinkets is installed
+  - Falls back to opening the pouch directly when no supported equip slot is available
 - **Shift + Right-click with pouch in hand**
-  - Swaps/equips it into the belt slot (if Accessories or Curios is installed)
+  - Opens that pouch directly
 
 From the pouch screen, you can manage stored emeralds through a container UI.
 
@@ -119,18 +121,46 @@ Emerald Pouch currently includes built-in compatibility with:
   - Supports equipping pouches in the belt slot
   - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
   - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
-  - **Shift + Right-click** can quickly equip a pouch into the belt slot
+  - **Right-click** can quickly equip a pouch into the belt slot
 
 - **[Curios](https://modrinth.com/mod/curios)**
   - Supports equipping pouches in the belt slot
   - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
   - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
-  - **Shift + Right-click** can quickly equip a pouch into the belt slot
+  - **Right-click** can quickly equip a pouch into the belt slot
 
 - **[ShulkerBoxTooltip](https://modrinth.com/mod/shulkerboxtooltip)**
   - Allows pouch contents to be previewed directly in the tooltip, similar to other container-style items
 
 If there is a specific mod you would like compatibility support for, feel free to open an issue on the [GitHub](https://github.com/JevenDev/Emerald-Pouch/issues) repo.
+
+## Mod Developer API
+
+Emerald Pouch now exposes a small common API under `com.jvn.emeraldpouch.api` for mods that want to read or fill pouch storage.
+
+Main entry points:
+
+- `EmeraldPouchApi.isPouch(stack)`
+- `EmeraldPouchApi.getContents(pouchStack)`
+- `EmeraldPouchApi.setSlot(pouchStack, slot, stack)`
+- `EmeraldPouchApi.findFirstPlayerPouch(playerInventory)`
+- `EmeraldPouchApi.insertIntoPlayerPouch(playerInventory, reference, stack, maxToInsert)`
+
+Example:
+
+```java
+Optional<PlayerPouchReference> pouchRef = EmeraldPouchApi.findFirstPlayerPouch(player.getInventory());
+if (pouchRef.isPresent()) {
+    ItemStack remainder = EmeraldPouchApi.insertIntoPlayerPouch(
+            player.getInventory(),
+            pouchRef.get(),
+            new ItemStack(Items.EMERALD, 16),
+            16
+    );
+}
+```
+
+Pouch slot contents are still restricted to emeralds and emerald blocks. For player-held pouches, prefer the `setPlayer...` and `insertIntoPlayerPouch(...)` helpers so Emerald Pouch can commit the updated stack back into inventory, Curios, or Accessories correctly.
 
 ![roadmap](https://cdn.modrinth.com/data/cached_images/04825ea0e2e5462ffa075e783ca38b0c63a36d34.png)
 

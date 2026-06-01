@@ -22,6 +22,39 @@ public final class EmeraldPouchClientConfig {
         }
     }
 
+    public enum InventoryPosition implements TranslatableEnum {
+        POSITION_1("emeraldpouch.configuration.inventory_position.position_1"),
+        POSITION_2("emeraldpouch.configuration.inventory_position.position_2"),
+        POSITION_3("emeraldpouch.configuration.inventory_position.position_3");
+
+        private final String translationKey;
+
+        InventoryPosition(String translationKey) {
+            this.translationKey = translationKey;
+        }
+
+        @Override
+        public Component getTranslatedName() {
+            return Component.translatable(this.translationKey);
+        }
+    }
+
+    public enum MerchantPosition implements TranslatableEnum {
+        POSITION_1("emeraldpouch.configuration.merchant_position.position_1"),
+        POSITION_2("emeraldpouch.configuration.merchant_position.position_2");
+
+        private final String translationKey;
+
+        MerchantPosition(String translationKey) {
+            this.translationKey = translationKey;
+        }
+
+        @Override
+        public Component getTranslatedName() {
+            return Component.translatable(this.translationKey);
+        }
+    }
+
     public enum HudIconColor implements TranslatableEnum {
         EMERALD("emeraldpouch.configuration.hud_icon_color.emerald"),
         BLACK("emeraldpouch.configuration.hud_icon_color.black"),
@@ -64,6 +97,23 @@ public final class EmeraldPouchClientConfig {
                     "POSITION_3 = beside hotbar and flips with active main-hand side."
             )
             .defineEnum("hudPosition", HudPosition.POSITION_1);
+    private static final ModConfigSpec.EnumValue<InventoryPosition> INVENTORY_POSITION = BUILDER
+            .translation("emeraldpouch.configuration.inventory_position")
+            .comment(
+                    "Controls where the pouch inventory indicator renders in the player inventory screen.",
+                    "POSITION_1 = under crafting.",
+                    "POSITION_2 = one slot above the offhand slot.",
+                    "POSITION_3 = across from the helmet slot (same column as offhand)."
+            )
+            .defineEnum("inventoryPosition", InventoryPosition.POSITION_1);
+    private static final ModConfigSpec.EnumValue<MerchantPosition> MERCHANT_POSITION = BUILDER
+            .translation("emeraldpouch.configuration.merchant_position")
+            .comment(
+                    "Controls where the pouch indicator renders in the villager trading screen.",
+                    "POSITION_1 = default position under crafting.",
+                    "POSITION_2 = centered between the trade output slot and the right edge of the container."
+            )
+            .defineEnum("merchantPosition", MerchantPosition.POSITION_1);
     private static final ModConfigSpec.BooleanValue SHOW_BUNDLE_COUNT_OVERLAY = BUILDER
             .translation("emeraldpouch.configuration.show_bundle_count_overlay")
             .comment("Render total pouch count centered on top of the pouch HUD icon.")
@@ -80,6 +130,14 @@ public final class EmeraldPouchClientConfig {
 
     public static HudPosition hudPosition() {
         return HUD_POSITION.get();
+    }
+
+    public static InventoryPosition inventoryPosition() {
+        return INVENTORY_POSITION.get();
+    }
+
+    public static MerchantPosition merchantPosition() {
+        return MERCHANT_POSITION.get();
     }
 
     public static boolean showBundleCountOverlay() {

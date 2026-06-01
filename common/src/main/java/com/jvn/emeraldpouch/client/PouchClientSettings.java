@@ -9,6 +9,17 @@ public final class PouchClientSettings {
         POSITION_3
     }
 
+    public enum InventoryPosition {
+        POSITION_1,
+        POSITION_2,
+        POSITION_3
+    }
+
+    public enum MerchantPosition {
+        POSITION_1,
+        POSITION_2
+    }
+
     public enum HudIconColor {
         EMERALD,
         BLACK,
@@ -34,6 +45,16 @@ public final class PouchClientSettings {
 
     @ExpectPlatform
     public static HudPosition hudPosition() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static InventoryPosition inventoryPosition() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static MerchantPosition merchantPosition() {
         throw new AssertionError();
     }
 
