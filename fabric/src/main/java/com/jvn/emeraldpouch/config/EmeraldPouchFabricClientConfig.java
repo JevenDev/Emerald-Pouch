@@ -44,6 +44,14 @@ public final class EmeraldPouchFabricClientConfig {
         return data.hudPosition;
     }
 
+    public static PouchClientSettings.InventoryPosition inventoryPosition() {
+        return data.inventoryPosition;
+    }
+
+    public static PouchClientSettings.MerchantPosition merchantPosition() {
+        return data.merchantPosition;
+    }
+
     public static boolean showBundleCountOverlay() {
         return data.showBundleCountOverlay;
     }
@@ -54,11 +62,15 @@ public final class EmeraldPouchFabricClientConfig {
 
     public static void apply(
             PouchClientSettings.HudPosition hudPosition,
+            PouchClientSettings.InventoryPosition inventoryPosition,
+            PouchClientSettings.MerchantPosition merchantPosition,
             boolean showBundleCountOverlay,
             PouchClientSettings.HudIconColor hudIconColor
     ) {
         ClientConfigData updated = new ClientConfigData();
         updated.hudPosition = hudPosition;
+        updated.inventoryPosition = inventoryPosition;
+        updated.merchantPosition = merchantPosition;
         updated.showBundleCountOverlay = showBundleCountOverlay;
         updated.hudIconColor = hudIconColor;
         data = sanitize(updated);
@@ -81,6 +93,12 @@ public final class EmeraldPouchFabricClientConfig {
         if (raw.hudPosition != null) {
             sanitized.hudPosition = raw.hudPosition;
         }
+        if (raw.inventoryPosition != null) {
+            sanitized.inventoryPosition = raw.inventoryPosition;
+        }
+        if (raw.merchantPosition != null) {
+            sanitized.merchantPosition = raw.merchantPosition;
+        }
         sanitized.showBundleCountOverlay = raw.showBundleCountOverlay;
         if (raw.hudIconColor != null) {
             sanitized.hudIconColor = raw.hudIconColor;
@@ -90,6 +108,8 @@ public final class EmeraldPouchFabricClientConfig {
 
     private static final class ClientConfigData {
         private PouchClientSettings.HudPosition hudPosition = PouchClientSettings.HudPosition.POSITION_1;
+        private PouchClientSettings.InventoryPosition inventoryPosition = PouchClientSettings.InventoryPosition.POSITION_1;
+        private PouchClientSettings.MerchantPosition merchantPosition = PouchClientSettings.MerchantPosition.POSITION_1;
         private boolean showBundleCountOverlay;
         private PouchClientSettings.HudIconColor hudIconColor = PouchClientSettings.HudIconColor.EMERALD;
     }

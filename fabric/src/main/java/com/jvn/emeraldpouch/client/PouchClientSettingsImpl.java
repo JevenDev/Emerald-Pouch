@@ -11,6 +11,14 @@ public final class PouchClientSettingsImpl {
         return EmeraldPouchFabricClientConfig.hudPosition();
     }
 
+    public static PouchClientSettings.InventoryPosition inventoryPosition() {
+        return EmeraldPouchFabricClientConfig.inventoryPosition();
+    }
+
+    public static PouchClientSettings.MerchantPosition merchantPosition() {
+        return EmeraldPouchFabricClientConfig.merchantPosition();
+    }
+
     public static boolean showBundleCountOverlay() {
         return EmeraldPouchFabricClientConfig.showBundleCountOverlay();
     }

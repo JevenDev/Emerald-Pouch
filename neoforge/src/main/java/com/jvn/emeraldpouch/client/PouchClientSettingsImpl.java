@@ -15,6 +15,21 @@ public final class PouchClientSettingsImpl {
         };
     }
 
+    public static PouchClientSettings.InventoryPosition inventoryPosition() {
+        return switch (EmeraldPouchClientConfig.inventoryPosition()) {
+            case POSITION_1 -> PouchClientSettings.InventoryPosition.POSITION_1;
+            case POSITION_2 -> PouchClientSettings.InventoryPosition.POSITION_2;
+            case POSITION_3 -> PouchClientSettings.InventoryPosition.POSITION_3;
+        };
+    }
+
+    public static PouchClientSettings.MerchantPosition merchantPosition() {
+        return switch (EmeraldPouchClientConfig.merchantPosition()) {
+            case POSITION_1 -> PouchClientSettings.MerchantPosition.POSITION_1;
+            case POSITION_2 -> PouchClientSettings.MerchantPosition.POSITION_2;
+        };
+    }
+
     public static boolean showBundleCountOverlay() {
         return EmeraldPouchClientConfig.showBundleCountOverlay();
     }

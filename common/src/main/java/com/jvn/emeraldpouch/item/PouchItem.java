@@ -45,11 +45,18 @@ public class PouchItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack heldStack = player.getItemInHand(usedHand);
-        if (player.isShiftKeyDown() && ModCompat.hasSlotCompatLoaded()) {
-            if (player instanceof ServerPlayer serverPlayer && PouchSlotAccess.tryEquipFromHand(serverPlayer, usedHand)) {
-                return InteractionResultHolder.sidedSuccess(serverPlayer.getItemInHand(usedHand), false);
+        if (player.isShiftKeyDown()) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                PouchMenuOpener.openFromHand(serverPlayer, usedHand);
             }
-            return InteractionResultHolder.pass(heldStack);
+
+            return InteractionResultHolder.sidedSuccess(heldStack, level.isClientSide());
+        }
+
+        if (ModCompat.hasSlotCompatLoaded()
+                && player instanceof ServerPlayer serverPlayer
+                && PouchSlotAccess.tryEquipFromHand(serverPlayer, usedHand)) {
+            return InteractionResultHolder.sidedSuccess(serverPlayer.getItemInHand(usedHand), false);
         }
 
         if (player instanceof ServerPlayer serverPlayer) {
