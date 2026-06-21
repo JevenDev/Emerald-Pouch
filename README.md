@@ -2,7 +2,10 @@
   
 <a href="https://modrinth.com/mod/emerald-pouch/settings/versions?l=neoforge"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/supported/neoforge_64h.png" alt="Available for NeoForge"></a>
 <a href="https://modrinth.com/mod/emerald-pouch/settings/versions?l=forge"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/supported/forge_64h.png" alt="Available for Forge"></a>
+<a href="https://modrinth.com/mod/emerald-pouch/settings/versions?l=fabric"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/supported/fabric_64h.png" alt="Available for Fabric"></a>
+<br>
 <a href="https://www.curseforge.com/minecraft/mc-mods/toucanlib"><img src="https://raw.githubusercontent.com/JevenDev/toucanLib/refs/heads/1.21.1/docs/badges/toucanlib_toucanlib_cozy_64h.png" alt="Requires toucanLib"></a>
+<a href="https://modrinth.com/mod/architectury-api"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/requires/architectury-api_64h.png"></a>
 <br>
 <a href="https://modrinth.com/mod/emerald-pouch" target="_blank" rel="noopener noreferrer"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/compact-minimal/available/modrinth_46h.png" alt="Available on Modrinth"></a>
 <a href="https://www.curseforge.com/minecraft/mc-mods/emerald-pouch" target="_blank" rel="noopener noreferrer"><img src="https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/compact-minimal/available/curseforge_46h.png" alt="Available on CurseForge"></a>
@@ -97,12 +100,12 @@ When choosing where emeralds are pulled from, Emerald Pouch prioritizes **equipp
 
 - **Open Emerald Pouch** - `N`
   - Opens the **first pouch found** in your inventory
-  - If [Accessories](https://modrinth.com/mod/accessories) or [Curios](https://modrinth.com/mod/curios) is installed, it will prioritize an equipped belt-slot pouch first
+  - If [Accessories](https://modrinth.com/mod/accessories). [Curios](https://modrinth.com/mod/curios), or [Trinkets](https://modrinth.com/mod/trinkets), is installed, it will prioritize an equipped belt-slot pouch first
 
 ## Controls
 
 - **Right-click with pouch in hand**
-  - Equips/swaps it into a supported belt/accessory slot if Accessories, Curios, or Trinkets is installed
+  - Equips/swaps it into a supported belt/accessory slot if Accessories, Curios, or Trinkets are installed
   - Falls back to opening the pouch directly when no supported equip slot is available
 - **Shift + Right-click with pouch in hand**
   - Opens that pouch directly
@@ -124,6 +127,12 @@ Emerald Pouch currently includes built-in compatibility with:
   - **Right-click** can quickly equip a pouch into the belt slot
 
 - **[Curios](https://modrinth.com/mod/curios)**
+  - Supports equipping pouches in the belt slot
+  - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
+  - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
+  - **Right-click** can quickly equip a pouch into the belt slot
+
+- **[Trinkets](https://modrinth.com/mod/trinkets)**
   - Supports equipping pouches in the belt slot
   - The default `N` keybind will prioritize opening the equipped belt-slot pouch first
   - Villager trading will prioritize equipped belt-slot pouches before other pouch locations
@@ -170,7 +179,7 @@ Pouch slot contents are still restricted to emeralds and emerald blocks. For pla
 - ⛔ **NeoForge 1.20.1** [Not planned]
 - ⛔ **Forge 1.21.1** [Not planned]
 - ✅ **Forge 1.20.1** [Active development]
-- 🚧 **Fabric 1.21.1** [Planned port]
+- ✅ **Fabric 1.21.1** [Active development]
 - 🚧 **Fabric 1.20.1** [Planned port]
 
 ## Planned Features
