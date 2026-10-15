@@ -95,3 +95,52 @@ publishing {
         }
     }
 }
+
+// Opt-in dedicated server regression tests; keep test code/worlds out of normal jars.
+if (providers.gradleProperty("pouchGameTests").isPresent()) {
+    sourceSets.main.java.srcDir("src/gametest/java")
+    sourceSets.main.java.srcDir("../common/src/gametest/java")
+    sourceSets.main.resources.srcDir("src/gametest/resources")
+    loom.runs {
+        gameTestServer {
+            server()
+            name "Pouch regression GameTests"
+            vmArg "-Dneoforge.gameTestServer=true"
+            vmArg "-Dneoforge.enabledGameTestNamespaces=emeraldpouch"
+            runDir "build/gametest-run"
+        }
+    }
+
+    // The normal Architectury dev launcher turns common into a separate fake mod,
+    // which conflicts with this project's shared packages on NeoForge's module path.
+    // Exercise the combined, production-transformed mod in the test server instead.
+    def commonJar = project(":common").tasks.named("transformProductionNeoForge")
+    def gameTestMod = tasks.register("prepareGameTestMod", Sync) {
+        dependsOn tasks.named("classes"), commonJar
+        from sourceSets.main.output
+        from { zipTree(commonJar.get().archiveFile.get().asFile) }
+        exclude "architectury.common.json"
+        into layout.buildDirectory.dir("gametest-mod")
+    }
+    loom.runs.gameTestServer.environmentVariable "MOD_CLASSES", "emeraldpouch%%${gameTestMod.get().destinationDir.absolutePath}"
+    tasks.named("runGameTestServer", JavaExec) {
+        dependsOn gameTestMod
+        def originalClasspath = files(classpath.files)
+        def projectOutputs = sourceSets.main.output.files
+        def commonDevDir = project(":common").layout.buildDirectory.dir("devlibs").get().asFile
+        classpath = originalClasspath.filter { file -> !projectOutputs.contains(file) && file.parentFile != commonDevDir }.plus(files(gameTestMod.get().destinationDir))
+        long startedAt = 0
+        doFirst {
+            startedAt = System.currentTimeMillis()
+            mainClass.set("net.fabricmc.devlaunchinjector.Main")
+        }
+        // NeoForge can return zero even after failing to load a mod. Require test completion.
+        doLast {
+            def testLog = layout.buildDirectory.file("gametest-run/logs/latest.log").get().asFile
+            if (!testLog.exists() || testLog.lastModified() < startedAt
+                    || !testLog.text.contains("All 4 required tests passed")) {
+                throw new GradleException("Pouch GameTests did not pass; inspect ${testLog}")
+            }
+        }
+    }
+}

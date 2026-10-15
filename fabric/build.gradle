@@ -96,3 +96,28 @@ publishing {
         }
     }
 }
+
+processResources.inputs.property("pouchGameTests", providers.gradleProperty("pouchGameTests").isPresent())
+
+// Opt-in dedicated server regression tests; never included in normal release jars.
+if (providers.gradleProperty("pouchGameTests").isPresent()) {
+    sourceSets.main.java.srcDir("src/gametest/java")
+    sourceSets.main.java.srcDir("../common/src/gametest/java")
+    processResources {
+        doLast {
+            def metadata = file("$destinationDir/fabric.mod.json")
+            def json = new groovy.json.JsonSlurper().parse(metadata)
+            json.entrypoints["fabric-gametest"] = ["com.jvn.emeraldpouch.fabric.PouchGameTests"]
+            metadata.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+        }
+    }
+    loom.runs {
+        gameTestServer {
+            server()
+            name "Pouch regression GameTests"
+            vmArg "-Dfabric-api.gametest"
+            vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file('gametest-results.xml').get().asFile}"
+            runDir "build/gametest-run"
+        }
+    }
+}

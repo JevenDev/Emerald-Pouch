@@ -29,3 +29,16 @@ publishing {
         }
     }
 }
+
+dependencies {
+    testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named("test", Test) {
+    useJUnitPlatform()
+    maxParallelForks = 1
+    workingDir layout.buildDirectory.dir("test-run")
+    systemProperty "pouch.projectDir", projectDir.absolutePath
+    doFirst { workingDir.mkdirs() }
+}

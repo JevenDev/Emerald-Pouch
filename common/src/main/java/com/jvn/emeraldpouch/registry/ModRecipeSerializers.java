@@ -2,6 +2,7 @@ package com.jvn.emeraldpouch.registry;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.recipe.PouchColoringRecipe;
+import com.jvn.emeraldpouch.recipe.PouchUpgradeRecipe;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
@@ -17,6 +18,9 @@ public final class ModRecipeSerializers {
                     "crafting_special_pouch_coloring",
                     () -> new SimpleCraftingRecipeSerializer<>(PouchColoringRecipe::new)
             );
+
+    public static final RegistrySupplier<RecipeSerializer<PouchUpgradeRecipe>> POUCH_UPGRADE =
+            RECIPE_SERIALIZERS.register("pouch_upgrade", PouchUpgradeRecipe.Serializer::new);
 
     private ModRecipeSerializers() {
     }
