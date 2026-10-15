@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "emeraldpouch:pouch_upgrade",
   "category": "misc",
   "key": {
     "L": {

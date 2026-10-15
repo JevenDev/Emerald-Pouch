@@ -105,3 +105,10 @@ idea {
         downloadJavadoc = true
     }
 }
+
+// GameTests are opt-in and use a disposable build directory, never existing saves.
+if (providers.gradleProperty("pouchGameTests").isPresent()) {
+    sourceSets.main.java.srcDir("src/gametest/java")
+    sourceSets.main.resources.srcDir("src/gametest/resources")
+    minecraft.runs.gameTestServer.workingDirectory = file("build/gametest-run")
+}
