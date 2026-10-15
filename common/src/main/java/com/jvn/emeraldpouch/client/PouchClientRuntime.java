@@ -101,7 +101,8 @@ public final class PouchClientRuntime {
 
     public static void onRenderHud(Minecraft minecraft, GuiGraphics guiGraphics) {
         Player player = minecraft.player;
-        if (player == null || minecraft.level == null || minecraft.options.hideGui) {
+        if (player == null || minecraft.level == null
+                || !PouchHudVisibility.isVisible(player.isSpectator(), minecraft.options.hideGui)) {
             return;
         }
 
@@ -266,7 +267,7 @@ public final class PouchClientRuntime {
         }
 
         Player player = minecraft.player;
-        if (player == null || minecraft.level == null) {
+        if (player == null || minecraft.level == null || player.isSpectator()) {
             return false;
         }
 
