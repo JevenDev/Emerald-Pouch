@@ -1,7 +1,6 @@
 package com.jvn.emeraldpouch.neoforge.client;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
-import com.jvn.emeraldpouch.client.ModKeyMappings;
 import com.jvn.emeraldpouch.client.PouchClientRuntime;
 import com.jvn.emeraldpouch.registry.ModItems;
 import com.jvn.emeraldpouch.registry.ModMenus;
@@ -14,7 +13,6 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -25,10 +23,6 @@ public final class EmeraldPouchClient {
 
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.POUCH_MENU.get(), PouchScreen::new);
-    }
-
-    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-        ModKeyMappings.register();
     }
 
     public static void onClientSetup(FMLClientSetupEvent event) {
