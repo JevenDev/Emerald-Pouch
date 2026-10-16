@@ -27,10 +27,6 @@ public final class EmeraldPouchClient {
         event.register(ModMenus.POUCH_MENU.get(), PouchScreen::new);
     }
 
-    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-        ModKeyMappings.register();
-    }
-
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ResourceLocation openedPropertyId = id("opened");

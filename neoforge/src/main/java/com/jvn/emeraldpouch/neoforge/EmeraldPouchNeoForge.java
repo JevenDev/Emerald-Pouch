@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch.neoforge;
 
 import com.jvn.emeraldpouch.EmeraldPouchMod;
+import com.jvn.emeraldpouch.client.ModKeyMappings;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import com.jvn.emeraldpouch.neoforge.network.ModNetwork;
 import com.jvn.emeraldpouch.neoforge.event.AutoPickupHandler;
@@ -23,7 +24,7 @@ public final class EmeraldPouchNeoForge {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClientExtensions.registerConfigScreen(modContainer);
             modEventBus.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::registerScreens);
-            modEventBus.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::registerKeyMappings);
+            ModKeyMappings.register();
             modEventBus.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onClientSetup);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onClientTick);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onRenderGuiLayerPost);
