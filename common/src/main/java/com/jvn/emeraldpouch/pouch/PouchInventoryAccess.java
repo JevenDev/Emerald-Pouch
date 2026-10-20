@@ -2,8 +2,11 @@ package com.jvn.emeraldpouch.pouch;
 
 import com.jvn.emeraldpouch.compat.PouchSlotAccess;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -178,26 +181,32 @@ public final class PouchInventoryAccess {
         int accessoriesBeltSlots = PouchSlotAccess.getAccessoriesBeltSlotCount(inventory.player);
         int curiosSlots = PouchSlotAccess.getCuriosSlotCount(inventory.player);
         List<PouchStackReference> references = new ArrayList<>(accessoriesBeltSlots + curiosSlots + Inventory.INVENTORY_SIZE + 1);
+        // compatibility layers can expose the same stack through multiple slot APIs
+        Set<ItemStack> seenStacks = Collections.newSetFromMap(new IdentityHashMap<>());
 
         // Prioritize equipped slot pouches over inventory pouches.
         for (int slot = 0; slot < accessoriesBeltSlots; slot++) {
-            if (PouchData.isPouchStack(PouchSlotAccess.getAccessoriesBeltStack(inventory.player, slot))) {
+            ItemStack stack = PouchSlotAccess.getAccessoriesBeltStack(inventory.player, slot);
+            if (PouchData.isPouchStack(stack) && seenStacks.add(stack)) {
                 references.add(PouchStackReference.accessoriesBelt(slot));
             }
         }
 
         for (int slot = 0; slot < curiosSlots; slot++) {
-            if (PouchData.isPouchStack(PouchSlotAccess.getCuriosStack(inventory.player, slot))) {
+            ItemStack stack = PouchSlotAccess.getCuriosStack(inventory.player, slot);
+            if (PouchData.isPouchStack(stack) && seenStacks.add(stack)) {
                 references.add(PouchStackReference.curios(slot));
             }
         }
 
-        if (PouchData.isPouchStack(inventory.getItem(Inventory.SLOT_OFFHAND))) {
+        ItemStack offhand = inventory.getItem(Inventory.SLOT_OFFHAND);
+        if (PouchData.isPouchStack(offhand) && seenStacks.add(offhand)) {
             references.add(PouchStackReference.inventory(Inventory.SLOT_OFFHAND));
         }
 
         for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
-            if (PouchData.isPouchStack(inventory.getItem(slot))) {
+            ItemStack stack = inventory.getItem(slot);
+            if (PouchData.isPouchStack(stack) && seenStacks.add(stack)) {
                 references.add(PouchStackReference.inventory(slot));
             }
         }

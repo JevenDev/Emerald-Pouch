@@ -1,5 +1,6 @@
 package com.jvn.emeraldpouch;
 
+import com.jvn.emeraldpouch.pouch.PouchInventoryChecks;
 import com.jvn.emeraldpouch.recipe.PouchCraftingChecks;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -17,4 +18,6 @@ public final class PouchGameTests {
     public static void fullInventory(GameTestHelper helper) { PouchCraftingChecks.fullInventory(helper); }
     @GameTest(template = "empty")
     public static void hudModes(GameTestHelper helper) { PouchCraftingChecks.hudModes(helper); }
+    @GameTest(template = "empty")
+    public static void pouchCounts(GameTestHelper helper) { PouchInventoryChecks.pouchCounts(helper); }
 }
