@@ -4,7 +4,6 @@ import com.jvn.emeraldpouch.EmeraldPouchMod;
 import com.jvn.emeraldpouch.client.ModKeyMappings;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import com.jvn.emeraldpouch.neoforge.network.ModNetwork;
-import com.jvn.emeraldpouch.neoforge.event.AutoPickupHandler;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -19,7 +18,6 @@ public final class EmeraldPouchNeoForge {
     public EmeraldPouchNeoForge(IEventBus modEventBus, ModContainer modContainer) {
         EmeraldPouchMod.init();
         modEventBus.addListener(ModNetwork::registerPayloadHandlers);
-        NeoForge.EVENT_BUS.addListener(AutoPickupHandler::onItemEntityPickupPost);
         modContainer.registerConfig(ModConfig.Type.CLIENT, EmeraldPouchClientConfig.SPEC);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClientExtensions.registerConfigScreen(modContainer);
