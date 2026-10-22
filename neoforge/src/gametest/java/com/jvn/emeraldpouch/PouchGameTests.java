@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch;
 
 import com.jvn.emeraldpouch.pouch.PouchInventoryChecks;
+import com.jvn.emeraldpouch.pouch.PouchPickupChecks;
 import com.jvn.emeraldpouch.recipe.PouchCraftingChecks;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -20,4 +21,6 @@ public final class PouchGameTests {
     public static void hudModes(GameTestHelper helper) { PouchCraftingChecks.hudModes(helper); }
     @GameTest(template = "empty")
     public static void pouchCounts(GameTestHelper helper) { PouchInventoryChecks.pouchCounts(helper); }
+    @GameTest(template = "empty")
+    public static void autoPickup(GameTestHelper helper) { PouchPickupChecks.autoPickup(helper); }
 }

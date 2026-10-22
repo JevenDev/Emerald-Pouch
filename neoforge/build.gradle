@@ -138,7 +138,7 @@ if (providers.gradleProperty("pouchGameTests").isPresent()) {
         doLast {
             def testLog = layout.buildDirectory.file("gametest-run/logs/latest.log").get().asFile
             if (!testLog.exists() || testLog.lastModified() < startedAt
-                    || !testLog.text.contains("All 5 required tests passed")) {
+                    || !testLog.text.contains("All 6 required tests passed")) {
                 throw new GradleException("Pouch GameTests did not pass; inspect ${testLog}")
             }
         }

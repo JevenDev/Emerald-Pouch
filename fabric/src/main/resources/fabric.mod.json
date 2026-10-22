@@ -27,6 +27,7 @@
     ]
   },
   "mixins": [
+    "emeraldpouch.mixins.json",
     {
       "config": "emeraldpouch.fabric.mixins.json",
       "environment": "client"

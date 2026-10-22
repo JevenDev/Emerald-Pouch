@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch.fabric;
 
 import com.jvn.emeraldpouch.pouch.PouchInventoryChecks;
+import com.jvn.emeraldpouch.pouch.PouchPickupChecks;
 import com.jvn.emeraldpouch.recipe.PouchCraftingChecks;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.gametest.framework.GameTest;
@@ -17,4 +18,6 @@ public final class PouchGameTests implements FabricGameTest {
     public void hudModes(GameTestHelper helper) { PouchCraftingChecks.hudModes(helper); }
     @GameTest(template = EMPTY_STRUCTURE)
     public void pouchCounts(GameTestHelper helper) { PouchInventoryChecks.pouchCounts(helper); }
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void autoPickup(GameTestHelper helper) { PouchPickupChecks.autoPickup(helper); }
 }
