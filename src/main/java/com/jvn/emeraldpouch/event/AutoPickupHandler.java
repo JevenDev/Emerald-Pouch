@@ -19,6 +19,9 @@ public final class AutoPickupHandler {
         }
 
         ItemEntity itemEntity = event.getItem();
+        if (itemEntity.target != null && !itemEntity.target.equals(event.getEntity().getUUID())) {
+            return;
+        }
         ItemStack entityStack = itemEntity.getItem();
         if (!PouchData.isAllowedContent(entityStack)) {
             return;
