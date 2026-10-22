@@ -1,6 +1,7 @@
 package com.jvn.emeraldpouch;
 
 import com.jvn.emeraldpouch.recipe.PouchCraftingChecks;
+import com.jvn.emeraldpouch.pouch.PouchPickupChecks;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraftforge.gametest.GameTestHolder;
@@ -19,4 +20,6 @@ public final class PouchGameTests {
     public static void nbtAndValidation(GameTestHelper helper) { com.jvn.emeraldpouch.recipe.PouchUpgradeNbtChecks.check(helper); }
     @GameTest(template = "empty")
     public static void hudModes(GameTestHelper helper) { PouchCraftingChecks.hudModes(helper); }
+    @GameTest(template = "empty")
+    public static void autoPickup(GameTestHelper helper) { PouchPickupChecks.autoPickup(helper); }
 }
