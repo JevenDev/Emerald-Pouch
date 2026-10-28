@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.client.event.ContainerScreenEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -164,9 +165,9 @@ public final class EmeraldPouchClient {
         );
     }
 
-    public static void onScreenRenderPost(ScreenEvent.Render.Post event) {
-        if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)
-                || !(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
+    public static void onContainerRenderForeground(ContainerScreenEvent.Render.Foreground event) {
+        AbstractContainerScreen<?> containerScreen = event.getContainerScreen();
+        if (!(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
             return;
         }
 
@@ -185,20 +186,26 @@ public final class EmeraldPouchClient {
         String counterText = displayData.compactEmeraldAmount();
         DisplayLayout layout = computeInventoryLayout(minecraft, containerScreen, counterText);
         boolean hoverIcon = isHovered(event.getMouseX(), event.getMouseY(), layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
-        renderIconAndMaybeText(
-                guiGraphics,
-                minecraft,
-                counterText,
-                displayData.pouchCount(),
-                layout,
-                hudIconTexture(),
-                hoverIcon
-        );
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(-containerScreen.getGuiLeft(), -containerScreen.getGuiTop(), 0.0F);
+        try {
+            renderIconAndMaybeText(
+                    guiGraphics,
+                    minecraft,
+                    counterText,
+                    displayData.pouchCount(),
+                    layout,
+                    hudIconTexture(),
+                    hoverIcon
+            );
 
-        boolean hoverText = showPouchText
-                && isHovered(event.getMouseX(), event.getMouseY(), layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
-        if (hoverIcon || hoverText) {
-            guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), Optional.empty(), event.getMouseX(), event.getMouseY());
+            boolean hoverText = showPouchText
+                    && isHovered(event.getMouseX(), event.getMouseY(), layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
+            if (hoverIcon || hoverText) {
+                guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), Optional.empty(), event.getMouseX(), event.getMouseY());
+            }
+        } finally {
+            guiGraphics.pose().popPose();
         }
     }
 

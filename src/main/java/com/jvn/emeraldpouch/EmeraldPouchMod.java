@@ -50,7 +50,7 @@ public final class EmeraldPouchMod {
             modEventBus.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onClientSetup);
             MinecraftForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onClientTick);
             MinecraftForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onRenderGuiLayerPost);
-            MinecraftForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onScreenRenderPost);
+            MinecraftForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onContainerRenderForeground);
             MinecraftForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onScreenMouseButtonPressedPre);
             MinecraftForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onScreenMouseButtonPressedPost);
             MinecraftForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.client.EmeraldPouchClient::onMouseButtonInputPre);
