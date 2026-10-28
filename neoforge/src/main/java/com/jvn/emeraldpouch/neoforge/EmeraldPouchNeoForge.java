@@ -26,7 +26,7 @@ public final class EmeraldPouchNeoForge {
             modEventBus.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onClientSetup);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onClientTick);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onRenderGuiLayerPost);
-            NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onScreenRenderPost);
+            NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onContainerRenderForeground);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onScreenMouseButtonPressedPre);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onScreenMouseButtonPressedPost);
             NeoForge.EVENT_BUS.addListener(com.jvn.emeraldpouch.neoforge.client.EmeraldPouchClient::onMouseButtonInputPre);

@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ContainerScreenEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
@@ -46,10 +47,10 @@ public final class EmeraldPouchClient {
         PouchClientRuntime.onRenderHud(Minecraft.getInstance(), event.getGuiGraphics());
     }
 
-    public static void onScreenRenderPost(ScreenEvent.Render.Post event) {
-        PouchClientRuntime.onScreenRenderPost(
+    public static void onContainerRenderForeground(ContainerScreenEvent.Render.Foreground event) {
+        PouchClientRuntime.onContainerRenderForeground(
                 Minecraft.getInstance(),
-                event.getScreen(),
+                event.getContainerScreen(),
                 event.getGuiGraphics(),
                 (int) event.getMouseX(),
                 (int) event.getMouseY()

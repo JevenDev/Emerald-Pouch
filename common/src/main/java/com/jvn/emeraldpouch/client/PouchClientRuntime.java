@@ -120,9 +120,8 @@ public final class PouchClientRuntime {
         );
     }
 
-    public static void onScreenRenderPost(Minecraft minecraft, Screen screen, GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        if (!(screen instanceof AbstractContainerScreen<?> containerScreen)
-                || !(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
+    public static void onContainerRenderForeground(Minecraft minecraft, AbstractContainerScreen<?> containerScreen, GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        if (!(containerScreen instanceof InventoryScreen || containerScreen instanceof MerchantScreen)) {
             return;
         }
 
@@ -140,21 +139,27 @@ public final class PouchClientRuntime {
         DisplayLayout layout = computeInventoryLayout(minecraft, containerScreen, counterText);
         boolean hoverIcon = isHovered(mouseX, mouseY, layout.iconX(), layout.iconY(), HUD_ICON_SIZE, HUD_ICON_SIZE);
         boolean showInventoryText = shouldShowScreenText(containerScreen);
-        renderIconAndMaybeText(
-                guiGraphics,
-                minecraft,
-                counterText,
-                displayData.pouchCount(),
-                layout,
-                hudIconTexture(),
-                hoverIcon,
-                showInventoryText
-        );
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(-screenLeft(containerScreen), -screenTop(containerScreen), 0.0F);
+        try {
+            renderIconAndMaybeText(
+                    guiGraphics,
+                    minecraft,
+                    counterText,
+                    displayData.pouchCount(),
+                    layout,
+                    hudIconTexture(),
+                    hoverIcon,
+                    showInventoryText
+            );
 
-        boolean hoverText = showInventoryText
-                && isHovered(mouseX, mouseY, layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
-        if (hoverIcon || hoverText) {
-            guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), java.util.Optional.empty(), mouseX, mouseY);
+            boolean hoverText = showInventoryText
+                    && isHovered(mouseX, mouseY, layout.textX(), layout.textY(), layout.textWidth(), minecraft.font.lineHeight);
+            if (hoverIcon || hoverText) {
+                guiGraphics.renderTooltip(minecraft.font, buildInventoryTooltip(displayData), java.util.Optional.empty(), mouseX, mouseY);
+            }
+        } finally {
+            guiGraphics.pose().popPose();
         }
     }
 
