@@ -1,5 +1,10 @@
 package com.jvn.emeraldpouch;
 
+import com.jvn.emeraldpouch.command.PouchCommands;
+import com.jvn.emeraldpouch.compat.PouchDeathCompat;
+import com.jvn.emeraldpouch.config.EmeraldPouchServerConfig;
+import com.jvn.emeraldpouch.event.PouchDeathHandler;
+import com.jvn.emeraldpouch.registry.ModEnchantments;
 import com.jvn.emeraldpouch.compat.ShulkerBoxTooltipCompat;
 import com.jvn.emeraldpouch.config.EmeraldPouchClientConfig;
 import com.jvn.emeraldpouch.event.AutoPickupHandler;
@@ -19,6 +24,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
@@ -33,6 +39,13 @@ public final class EmeraldPouchMod {
         ModMenus.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
         ModRecipeSerializers.register(modEventBus);
+        ModEnchantments.register(modEventBus);
+        modEventBus.addListener((FMLCommonSetupEvent event) -> event.enqueueWork(PouchDeathCompat::register));
+        MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.server.ServerStartingEvent event) -> EmeraldPouchServerConfig.load());
+        MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.RegisterCommandsEvent event) -> PouchCommands.register(event.getDispatcher()));
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, PouchDeathHandler::onDeath);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, PouchDeathHandler::onDrops);
+        MinecraftForge.EVENT_BUS.addListener(PouchDeathHandler::onClone);
         ModNetwork.register();
         ShulkerBoxTooltipCompat.registerPluginExtension();
 
