@@ -3,6 +3,8 @@
   "package": "com.jvn.emeraldpouch.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "InventoryMixin",
+    "ServerPlayerMixin",
     "ItemEntityMixin"
   ],
   "injectors": {

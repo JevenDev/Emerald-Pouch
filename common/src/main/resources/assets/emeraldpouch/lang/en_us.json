@@ -1,4 +1,7 @@
 {
+  "enchantment.emeraldpouch.soulbound": "Soulbound",
+  "commands.emeraldpouch.keep_on_death": "Keep emerald pouches on death without Soulbound: %s",
+  "commands.emeraldpouch.save_failed": "Could not save the emerald pouch server config. See the server log.",
   "item.emeraldpouch.pouch": "Pouch",
   "item.emeraldpouch.large_pouch": "Large Pouch",
   "item.emeraldpouch.black_pouch": "Black Pouch",
