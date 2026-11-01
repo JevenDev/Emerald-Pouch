@@ -39,6 +39,7 @@ dependencies {
 }
 
 processResources {
+    from(project(":common").file("src/main/resources/logo.png"))
     inputs.property "mod_id", rootProject.mod_id
     inputs.property "mod_name", rootProject.mod_name
     inputs.property "mod_authors", rootProject.mod_authors
